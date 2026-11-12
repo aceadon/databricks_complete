@@ -1,0 +1,27 @@
+# Week 10, step 4 (optional): validate the bundle on every pull request, deploy on merge to main.
+# Copy to .github/workflows/bundle.yml in YOUR repo, then add two repository secrets:
+#   DATABRICKS_HOST  (https://<your-workspace>.cloud.databricks.com)
+#   DATABRICKS_TOKEN (a personal access token or, better, a service principal token)
+# and a repository variable WAREHOUSE_ID. Never commit a token.
+# Kept out of .github/ here so this reference repo doesn't run it without secrets.
+name: Tema bundle
+on:
+  pull_request:
+    paths: ["databricks.yml", "hr_people_analytics/metrics/**"]
+  push:
+    branches: [main]
+    paths: ["databricks.yml", "hr_people_analytics/metrics/**"]
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - run: databricks bundle validate --var="warehouse_id=${{ vars.WAREHOUSE_ID }}"
+      - if: github.event_name == 'push'
+        run: |
+          databricks bundle deploy --var="warehouse_id=${{ vars.WAREHOUSE_ID }}"
+          databricks bundle run deploy_metric_views --var="warehouse_id=${{ vars.WAREHOUSE_ID }}"

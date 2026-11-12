@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+
+# Databricks
+.databricks/
+.bundle/
+
+# Local data and secrets: never commit real employee data or credentials
+*.csv
+*.parquet
+*.pkl
+.env
+*.pem
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

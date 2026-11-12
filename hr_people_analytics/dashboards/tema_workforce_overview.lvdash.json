@@ -1,0 +1,738 @@
+{
+  "datasets": [
+    {
+      "name": "kpi_latest",
+      "displayName": "Headcount, latest month (workforce_metrics)",
+      "queryLines": [
+        "SELECT division, MEASURE(headcount) AS headcount, MEASURE(fte) AS fte\n",
+        "FROM workspace.tema_hr_semantic.workforce_metrics\n",
+        "WHERE month = '2026-10-31'   -- latest month in the Tema data\n",
+        "GROUP BY ALL"
+      ]
+    },
+    {
+      "name": "kpi_ytd",
+      "displayName": "Net change since January (workforce_metrics)",
+      "queryLines": [
+        "SELECT division, MEASURE(hires) AS hires, MEASURE(leavers) AS leavers, MEASURE(net_change) AS net_change\n",
+        "FROM workspace.tema_hr_semantic.workforce_metrics\n",
+        "WHERE month BETWEEN '2026-01-01' AND '2026-10-31'\n",
+        "GROUP BY ALL"
+      ]
+    },
+    {
+      "name": "hc_trend",
+      "displayName": "Headcount by month and division (workforce_metrics)",
+      "queryLines": [
+        "SELECT month, quarter, division, MEASURE(headcount) AS headcount\n",
+        "FROM workspace.tema_hr_semantic.workforce_metrics\n",
+        "GROUP BY ALL"
+      ]
+    },
+    {
+      "name": "attrition_latest",
+      "displayName": "Trailing 12-month attrition by division (retention_metrics)",
+      "queryLines": [
+        "SELECT division,\n",
+        "       MEASURE(attrition_rate_t12m)           AS attrition,\n",
+        "       MEASURE(voluntary_attrition_rate_t12m) AS voluntary_attrition,\n",
+        "       MEASURE(regretted_attrition_rate_t12m) AS regretted_attrition\n",
+        "FROM workspace.tema_hr_semantic.retention_metrics\n",
+        "WHERE month = '2026-10-31'\n",
+        "GROUP BY ALL"
+      ]
+    },
+    {
+      "name": "hiring_ai_vs_rest",
+      "displayName": "Hiring since the AI boom, AI vs rest (talent_acquisition_metrics)",
+      "queryLines": [
+        "SELECT CASE WHEN is_ai_division THEN 'AI' ELSE 'Rest of Tema' END AS team,\n",
+        "       MEASURE(median_time_to_fill_days) AS median_days_to_fill,\n",
+        "       MEASURE(offer_acceptance_rate)    AS offer_acceptance\n",
+        "FROM workspace.tema_hr_semantic.talent_acquisition_metrics\n",
+        "WHERE opened_date >= '2025-05-01' AND status = 'Filled'\n",
+        "GROUP BY ALL"
+      ]
+    },
+    {
+      "name": "enps_by_cycle",
+      "displayName": "eNPS by survey cycle (experience_metrics)",
+      "queryLines": [
+        "SELECT survey_cycle, division, MEASURE(enps) AS enps, MEASURE(responses) AS responses\n",
+        "FROM workspace.tema_hr_semantic.experience_metrics\n",
+        "GROUP BY ALL"
+      ]
+    },
+    {
+      "name": "enps_company",
+      "displayName": "eNPS by survey cycle, whole company (experience_metrics)",
+      "queryLines": [
+        "SELECT survey_cycle, MEASURE(enps) AS enps\n",
+        "FROM workspace.tema_hr_semantic.experience_metrics\n",
+        "GROUP BY ALL"
+      ]
+    },
+    {
+      "name": "ai_growth",
+      "displayName": "AI headcount and regretted attrition by month (two metric views)",
+      "queryLines": [
+        "SELECT w.month, w.ai_headcount, r.ai_regretted_attrition\n",
+        "FROM (SELECT month, MEASURE(headcount) AS ai_headcount\n",
+        "      FROM workspace.tema_hr_semantic.workforce_metrics WHERE division = 'AI' GROUP BY ALL) w\n",
+        "JOIN (SELECT month, MEASURE(regretted_attrition_rate_t12m) AS ai_regretted_attrition\n",
+        "      FROM workspace.tema_hr_semantic.retention_metrics WHERE division = 'AI' GROUP BY ALL) r USING (month)"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "workforce_overview",
+      "displayName": "Workforce overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "title",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## Tema Workforce Overview\n",
+                "Every number here comes from a certified metric view in `tema_hr_semantic`. Synthetic data, as of 31 October 2026."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "hc_today",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "kpi_latest",
+                  "fields": [
+                    {
+                      "name": "sum(headcount)",
+                      "expression": "SUM(`headcount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(headcount)",
+                  "displayName": "Headcount"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Headcount, October 2026",
+                "showDescription": true,
+                "description": "Month-end headcount. Expect 5,024 at 5,000 people."
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "net_change",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "kpi_ytd",
+                  "fields": [
+                    {
+                      "name": "sum(net_change)",
+                      "expression": "SUM(`net_change`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(net_change)",
+                  "displayName": "Net change"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Change since January",
+                "showDescription": true,
+                "description": "Hires minus leavers, Jan to Oct 2026. Expect +625."
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 2,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "division_filter",
+            "queries": [
+              {
+                "name": "f_kpi_latest",
+                "query": {
+                  "datasetName": "kpi_latest",
+                  "fields": [
+                    {
+                      "name": "division",
+                      "expression": "`division`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "f_kpi_ytd",
+                "query": {
+                  "datasetName": "kpi_ytd",
+                  "fields": [
+                    {
+                      "name": "division",
+                      "expression": "`division`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "f_hc_trend",
+                "query": {
+                  "datasetName": "hc_trend",
+                  "fields": [
+                    {
+                      "name": "division",
+                      "expression": "`division`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "f_attrition_latest",
+                "query": {
+                  "datasetName": "attrition_latest",
+                  "fields": [
+                    {
+                      "name": "division",
+                      "expression": "`division`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "f_enps_by_cycle",
+                "query": {
+                  "datasetName": "enps_by_cycle",
+                  "fields": [
+                    {
+                      "name": "division",
+                      "expression": "`division`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "division",
+                    "displayName": "Division",
+                    "queryName": "f_kpi_latest"
+                  },
+                  {
+                    "fieldName": "division",
+                    "displayName": "Division",
+                    "queryName": "f_kpi_ytd"
+                  },
+                  {
+                    "fieldName": "division",
+                    "displayName": "Division",
+                    "queryName": "f_hc_trend"
+                  },
+                  {
+                    "fieldName": "division",
+                    "displayName": "Division",
+                    "queryName": "f_attrition_latest"
+                  },
+                  {
+                    "fieldName": "division",
+                    "displayName": "Division",
+                    "queryName": "f_enps_by_cycle"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Division"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "hc_trend_area",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "hc_trend",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "division",
+                      "expression": "`division`"
+                    },
+                    {
+                      "name": "sum(headcount)",
+                      "expression": "SUM(`headcount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "area",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Month"
+                },
+                "y": {
+                  "fieldName": "sum(headcount)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Headcount"
+                },
+                "color": {
+                  "fieldName": "division",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Division"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Headcount by month and division",
+                "showDescription": true,
+                "description": "Stacked month-end headcount. Divisions add up; months never do."
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "attrition_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "attrition_latest",
+                  "fields": [
+                    {
+                      "name": "division",
+                      "expression": "`division`"
+                    },
+                    {
+                      "name": "attrition",
+                      "expression": "MAX(`attrition`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "division",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  },
+                  "displayName": "Division"
+                },
+                "y": {
+                  "fieldName": "attrition",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 1
+                    }
+                  },
+                  "displayName": "Attrition (T12M)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Trailing 12-month attrition by division, October 2026",
+                "showDescription": true,
+                "description": "Leavers in 12 months / average month-end headcount. Trust & Safety and AI lead."
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "hiring_days",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "hiring_ai_vs_rest",
+                  "fields": [
+                    {
+                      "name": "team",
+                      "expression": "`team`"
+                    },
+                    {
+                      "name": "median_days_to_fill",
+                      "expression": "MAX(`median_days_to_fill`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "team",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Team"
+                },
+                "y": {
+                  "fieldName": "median_days_to_fill",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Median days to fill"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Median days to fill since May 2025",
+                "showDescription": true,
+                "description": "Filled roles only. Expect AI about 67, rest 41."
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 11,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "hiring_offers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "hiring_ai_vs_rest",
+                  "fields": [
+                    {
+                      "name": "team",
+                      "expression": "`team`"
+                    },
+                    {
+                      "name": "offer_acceptance",
+                      "expression": "MAX(`offer_acceptance`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "team",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Team"
+                },
+                "y": {
+                  "fieldName": "offer_acceptance",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 0
+                    }
+                  },
+                  "displayName": "Offer acceptance"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Offer acceptance since May 2025",
+                "showDescription": true,
+                "description": "Expect AI about 70%, rest 84%."
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 14,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "enps_line",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "enps_company",
+                  "fields": [
+                    {
+                      "name": "survey_cycle",
+                      "expression": "`survey_cycle`"
+                    },
+                    {
+                      "name": "enps",
+                      "expression": "MAX(`enps`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "survey_cycle",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Survey cycle"
+                },
+                "y": {
+                  "fieldName": "enps",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "eNPS"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "eNPS by survey cycle",
+                "showDescription": true,
+                "description": "From -7.1 after the January 2023 layoffs to +16.7 in 2026-H1. Not filtered by division: eNPS is a ratio and can't be added up across divisions."
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "ai_headcount",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ai_growth",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "ai_headcount",
+                      "expression": "MAX(`ai_headcount`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Month"
+                },
+                "y": {
+                  "fieldName": "ai_headcount",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "AI headcount"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "AI: growing fast\u2026",
+                "showDescription": true,
+                "description": "AI month-end headcount. Flat near 100 until April 2025, 674 by October 2026."
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 22,
+            "width": 3,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "ai_regretted",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ai_growth",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "ai_regretted_attrition",
+                      "expression": "MAX(`ai_regretted_attrition`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Month"
+                },
+                "y": {
+                  "fieldName": "ai_regretted_attrition",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 1
+                    }
+                  },
+                  "displayName": "AI regretted attrition (T12M)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "\u2026losing the people we want to keep",
+                "showDescription": true,
+                "description": "AI regretted attrition reaches about 10% (rest of Tema under 4%). The AI boom began in May 2025."
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 22,
+            "width": 3,
+            "height": 6
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+# =====================================================================================
+# Tema semantic layer bundle (Week 10): deploys every metric view from Git.
+#   databricks auth login --host <your-workspace-url>
+#   databricks bundle validate --var="warehouse_id=<id>"
+#   databricks bundle deploy   --var="warehouse_id=<id>"
+#   databricks bundle run deploy_metric_views --var="warehouse_id=<id>"
+# The SQL files name workspace.tema_hr_semantic, so this deploys into YOUR schemas, not tema_ref_*.
+# The gold tables must exist first (run them, or reference/00_build_reference with reference_prefix = tema_hr).
+# Untested: run `databricks bundle validate` and fix what it reports. If Free Edition won't run SQL file
+# tasks on a warehouse, swap them for one notebook task on serverless that runs reference/00_build_reference.
+# =====================================================================================
+bundle:
+  name: tema_semantic_layer
+
+variables:
+  catalog:
+    description: Unity Catalog catalog that holds the Tema schemas
+    default: workspace
+  warehouse_id:
+    description: SQL warehouse that runs the metric view files (SQL Warehouses > your warehouse > Connection details)
+    # No default: pass it per target below, or on the command line with
+    #   databricks bundle deploy --var="warehouse_id=<id>"
+    # A warehouse ID isn't a secret, but keep tokens out of this file.
+
+resources:
+  jobs:
+    deploy_metric_views:
+      name: Deploy Tema metric views
+      tasks:
+        - task_key: workforce_metrics
+          sql_task:
+            file:
+              path: ./hr_people_analytics/metrics/workforce_metrics.sql
+            warehouse_id: ${var.warehouse_id}
+        - task_key: retention_metrics
+          depends_on: [{ task_key: workforce_metrics }]
+          sql_task:
+            file:
+              path: ./hr_people_analytics/metrics/retention_metrics.sql
+            warehouse_id: ${var.warehouse_id}
+        # The rest only read gold tables, so they don't depend on each other. They depend on
+        # workforce_metrics only so a broken first deploy stops the run early.
+        - task_key: talent_acquisition_metrics
+          depends_on: [{ task_key: workforce_metrics }]
+          sql_task:
+            file:
+              path: ./hr_people_analytics/metrics/talent_acquisition_metrics.sql
+            warehouse_id: ${var.warehouse_id}
+        - task_key: experience_metrics
+          depends_on: [{ task_key: workforce_metrics }]
+          sql_task:
+            file:
+              path: ./hr_people_analytics/metrics/experience_metrics.sql
+            warehouse_id: ${var.warehouse_id}
+        - task_key: pay_metrics
+          depends_on: [{ task_key: workforce_metrics }]
+          sql_task:
+            file:
+              path: ./hr_people_analytics/metrics/pay_metrics.sql
+            warehouse_id: ${var.warehouse_id}
+        # Week 9's safe view reads pay_metrics, so it must run after it
+        - task_key: pay_by_level_safe
+          depends_on: [{ task_key: pay_metrics }]
+          sql_task:
+            file:
+              path: ./hr_people_analytics/metrics/pay_by_level_safe.sql
+            warehouse_id: ${var.warehouse_id}
+        # Week 11. Needs tema_hr_gold.fact_business_monthly (hr_people_analytics/gold/10_fact_ad_revenue.sql).
+        - task_key: business_metrics
+          depends_on: [{ task_key: workforce_metrics }]
+          sql_task:
+            file:
+              path: ./hr_people_analytics/metrics/business_metrics.sql
+            warehouse_id: ${var.warehouse_id}
+
+targets:
+  dev:
+    default: true
+    mode: development
+    variables:
+      warehouse_id: "<your-warehouse-id>"   # replace, e.g. 1234567890abcdef
