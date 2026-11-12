@@ -29,7 +29,7 @@ measures:
     display_name: eNPS
     comment: "% promoters (9-10) minus % detractors (0-6). Ranges from -100 to +100. Never average enps_score."
     synonyms: ["employee net promoter score", "net promoter"]
-    expr: 100.0 * (COUNT(1) FILTER (WHERE source.enps_score >= 9) - COUNT(1) FILTER (WHERE source.enps_score <= 6)) / COUNT(1)
+    expr: try_divide(100.0 * (COUNT(1) FILTER (WHERE source.enps_score >= 9) - COUNT(1) FILTER (WHERE source.enps_score <= 6)), COUNT(1))
   - name: engagement_score
     display_name: Engagement score
     comment: "Average engagement index, 1 (low) to 5 (high)."
