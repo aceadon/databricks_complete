@@ -228,17 +228,21 @@ export class Director {
       let stableSince = Date.now();
       while (Date.now() - start < max * 1000) {
         await sleep(500);
+        // Signature of the visible text with digits removed, so running timers and clocks don't count as change.
         const sig = await this.page
           .evaluate(() => {
-            const busy = document.querySelectorAll('[aria-busy="true"], [role="progressbar"], .spinner, [data-testid*="spinner" i], [class*="loading" i]').length;
-            return document.body.innerText.length * 10 + Math.min(busy, 9);
+            const t = document.body.innerText.replace(/[0-9]/g, '');
+            let h = 0;
+            for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0;
+            const busy = document.querySelectorAll('[aria-busy="true"]').length > 0;
+            return `${t.length}:${h}:${busy}`;
           })
           .catch(() => last);
         if (sig !== last) {
           last = sig;
           stableSince = Date.now();
         }
-        if (Date.now() - start > min * 1000 && Date.now() - stableSince > quiet * 1000 && sig % 10 === 0) return;
+        if (Date.now() - start > min * 1000 && Date.now() - stableSince > quiet * 1000 && !String(sig).endsWith(':true')) return;
       }
       this.log('  (page still changing after the time limit; carrying on)');
     });
