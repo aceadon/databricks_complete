@@ -4,7 +4,22 @@ The **finished** version of the 12-week [zero to semantic hero](plan/zero-to-sem
 
 Use it to check your own work, not to skip it: each lab is worth doing yourself first. Everything here is synthetic. Never load real employee data into a personal or trial workspace.
 
-## Import it into Databricks
+## Stand it up quickly
+
+About 15 minutes at 5,000 people. You don't need to delete or change anything you've already built.
+
+1. **Check your GitHub token covers this repo.** If your Databricks Git credential is a fine-grained GitHub token limited to one repo, add `databricks_complete` to it (GitHub > Settings > Developer settings > tokens), or create a new one. A classic token with `repo` scope already works.
+2. **Add the Git folder.** **Workspace > Create > Git folder**, paste `https://github.com/aceadon/databricks_complete`, name it `databricks_complete`. Keep your own repo's Git folder as it is.
+3. **Data: only if you don't have it already.** Both repos read the same `workspace.tema_hr_raw` tables. If `SHOW TABLES IN workspace.tema_hr_raw` lists 12 tables, skip this step. Otherwise open `hr_people_analytics/00_generate_hr_data.py`, set `target_headcount` to `5000`, attach **Serverless**, **Run all** (about 2 minutes). Use 5,000 if you want the lab checkpoint numbers to match; 70,000 works too, and then step 5 compares with the reference instead.
+4. **Build everything.** Open `reference/00_build_reference`, attach **Serverless**, leave the widgets at their defaults (`through_week` 12), **Run all**. It creates the gold tables, all six metric views, the safe pay view, the HRBP access model and the business data in `tema_ref_gold`, `tema_ref_semantic` and `tema_ref_secure`. The last cell lists what it built, and the cell before it shows any step your workspace refused.
+5. **Check it.** Open `reference/01_check_my_work`, **Run all**. Set `my_prefix` to `tema_ref` to confirm the reference itself matches the lab numbers, or leave it at `tema_hr` to check your own work.
+6. **Dashboard (optional).** Click `hr_people_analytics/dashboards/tema_workforce_overview.lvdash.json`. On the **Data** tab change `tema_hr_semantic` to `tema_ref_semantic` in each dataset, then publish.
+7. **Genie (optional).** **Genie > New**, add the metric views in `tema_ref_semantic` (not `pay_metrics`), paste the text from `hr_people_analytics/genie/instructions.md`, and add the queries in `genie/example_queries.sql` as examples.
+8. **HRBP activity (optional).** Open `hr_people_analytics/governance/02_hrbp_access_activity.sql`, change `USE SCHEMA tema_hr_secure` to `tema_ref_secure` at the top, and run it cell by cell.
+
+**Want the reference to *be* your `tema_hr_*` schemas** (for example to demo from the names the labs use, or to deploy with `databricks.yml`)? In step 4 set `reference_prefix` to `tema_hr`. That replaces your own gold, semantic and secure objects, so commit your work first.
+
+## Import it into Databricks (details)
 
 Keep your own repo as one Git folder and add this one as a second, so you can open them side by side.
 
