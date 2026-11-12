@@ -1,0 +1,15 @@
+{
+  "name": "tema-demo-recorder",
+  "private": true,
+  "type": "module",
+  "description": "Drives Databricks in Chrome and records each screen scene of the demo videos",
+  "scripts": {
+    "chrome": "node chrome.mjs",
+    "login": "node record.mjs --login",
+    "warmup": "node record.mjs --warmup",
+    "record": "node record.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.49.1"
+  }
+}

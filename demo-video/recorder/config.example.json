@@ -1,0 +1,15 @@
+{
+  "_help": "Copy to config.json and fill in. URLs are what you see in the browser address bar when the thing is open.",
+  "workspaceUrl": "https://YOUR-WORKSPACE.cloud.databricks.com",
+  "sqlQueryUrl": "Open SQL Editor, create a new empty query named 'Demo recording', attach your SQL warehouse, save it, paste its URL here",
+  "genieRawUrl": "URL of the 'Tema raw (baseline)' Genie space",
+  "genieAssistantUrl": "URL of the 'People Analytics Assistant' Genie space",
+  "hrbpNotebookUrl": "URL of hr_people_analytics/governance/02_hrbp_access_activity in your workspace",
+  "salaryEmployee": "Priya Patel",
+
+  "browserChannel": "chrome",
+  "runQueryKey": "Control+Enter",
+  "runCellKey": "Shift+Enter",
+  "typingDelayMs": 40,
+  "expect": {"naive": "175,?524", "semantic": "58,?862"}
+}

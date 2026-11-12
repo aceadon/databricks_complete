@@ -31,24 +31,28 @@ USE SCHEMA tema_hr_secure;
 -- An HRBP who supports leaders in more than one division (the most cross-area one)
 DECLARE OR REPLACE VARIABLE hrbp_a BIGINT;
 SET VAR hrbp_a = (
-  SELECT d.hrbp_employee_id
-  FROM (SELECT DISTINCT hrbp_employee_id, leader_employee_id FROM hrbp_scope_detail) d
-  JOIN current_assignment c ON c.employee_id = d.leader_employee_id
-  JOIN tema_hr_raw.departments dep ON dep.department_id = c.department_id
-  GROUP BY d.hrbp_employee_id
-  HAVING count(DISTINCT dep.division) > 1
-  ORDER BY count(DISTINCT dep.division) DESC, count(*) DESC, d.hrbp_employee_id
+  SELECT hrbp_employee_id
+  FROM (SELECT d.hrbp_employee_id, count(DISTINCT dep.division) AS divisions, count(*) AS leaders
+        FROM (SELECT DISTINCT hrbp_employee_id, leader_employee_id FROM hrbp_scope_detail) d
+        JOIN current_assignment c ON c.employee_id = d.leader_employee_id
+        JOIN tema_hr_raw.departments dep ON dep.department_id = c.department_id
+        GROUP BY d.hrbp_employee_id)
+  WHERE divisions > 1
+  ORDER BY divisions DESC, leaders DESC, hrbp_employee_id
   LIMIT 1);
 
 -- A leader supported by two HRBPs, one of whom is hrbp_a if possible, and the other HRBP
 DECLARE OR REPLACE VARIABLE shared_leader BIGINT;
 DECLARE OR REPLACE VARIABLE hrbp_b BIGINT;
 SET VAR shared_leader = (
-  SELECT leader_employee_id FROM tema_hr_raw.hrbp_assignments
-  WHERE effective_to IS NULL
-  GROUP BY leader_employee_id
-  HAVING count(DISTINCT hrbp_employee_id) > 1
-  ORDER BY max(CASE WHEN hrbp_employee_id = hrbp_a THEN 1 ELSE 0 END) DESC, leader_employee_id
+  SELECT leader_employee_id
+  FROM (SELECT leader_employee_id, count(DISTINCT hrbp_employee_id) AS hrbps,
+               max(CASE WHEN hrbp_employee_id = hrbp_a THEN 1 ELSE 0 END) AS has_hrbp_a
+        FROM tema_hr_raw.hrbp_assignments
+        WHERE effective_to IS NULL
+        GROUP BY leader_employee_id)
+  WHERE hrbps > 1
+  ORDER BY has_hrbp_a DESC, leader_employee_id
   LIMIT 1);
 SET VAR hrbp_b = (
   SELECT min(hrbp_employee_id) FROM tema_hr_raw.hrbp_assignments
@@ -246,9 +250,13 @@ SELECT * FROM equity_grants ORDER BY grant_date;
 
 DECLARE OR REPLACE VARIABLE ended_assignment BIGINT;
 SET VAR ended_assignment = (
-  SELECT a.assignment_id FROM tema_hr_raw.hrbp_assignments a
+  SELECT a.assignment_id
+  FROM tema_hr_raw.hrbp_assignments a
+  JOIN (SELECT ancestor_id, count(*) AS org_size FROM org_closure GROUP BY ancestor_id) o
+    ON o.ancestor_id = a.leader_employee_id
   WHERE a.hrbp_employee_id = hrbp_a AND a.effective_to IS NULL
-  ORDER BY (SELECT count(*) FROM org_closure o WHERE o.ancestor_id = a.leader_employee_id) DESC LIMIT 1);
+  ORDER BY o.org_size DESC, a.assignment_id
+  LIMIT 1);
 
 UPDATE tema_hr_raw.hrbp_assignments SET effective_to = date_sub(current_date(), 1) WHERE assignment_id = ended_assignment;
 CREATE OR REPLACE TABLE hrbp_scope AS SELECT DISTINCT hrbp_employee_id, employee_id FROM hrbp_scope_detail;
