@@ -67,12 +67,12 @@ SET VAR manager_m = (
   JOIN current_assignment m ON m.employee_id = c.manager_id AND m.job_level IN ('M1', 'M2'));
 SET VAR employee_e = (SELECT min(employee_id) FROM current_assignment WHERE manager_id = manager_m);
 
-SELECT p.employee_id, p.first_name, p.last_name, p.job_title, p.division,
+SELECT p.employee_id, p.first_name, p.last_name, c.job_title, dep.division,
        CASE p.employee_id WHEN hrbp_a THEN 'hrbp_a' WHEN hrbp_b THEN 'hrbp_b' WHEN shared_leader THEN 'shared_leader'
                           WHEN manager_m THEN 'manager_m' WHEN employee_e THEN 'employee_e' END AS demo_role
 FROM tema_hr_raw.employees p
-JOIN current_assignment c USING (employee_id)
-JOIN tema_hr_raw.departments USING (department_id)
+JOIN current_assignment c ON c.employee_id = p.employee_id
+JOIN tema_hr_raw.departments dep ON dep.department_id = c.department_id
 WHERE p.employee_id IN (hrbp_a, hrbp_b, shared_leader, manager_m, employee_e);
 
 -- COMMAND ----------
