@@ -25,3 +25,9 @@ demo-video/audio/
 demo-video/renders/
 demo-video/remotion/node_modules/
 demo-video/remotion/out/
+demo-video/recorder/node_modules/
+demo-video/recorder/config.json
+demo-video/recorder/.profile/
+demo-video/recorder/failed-*.png
+demo-video/remotion/public/capture/
+demo-video/remotion/public/audio/

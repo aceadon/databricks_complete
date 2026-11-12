@@ -5,7 +5,8 @@
   "description": "Remotion motion graphics for the Tema HR semantic layer demo videos",
   "scripts": {
     "studio": "remotion studio",
-    "render:all": "node render-all.mjs"
+    "render:all": "node render-all.mjs",
+    "assemble": "node assemble.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.1.1",

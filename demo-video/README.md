@@ -16,14 +16,15 @@ Three videos built from [`docs/demo-scripts-gap-selling.md`](../docs/demo-script
 | [`narration/scenes.json`](narration/scenes.json) | The single source of truth for narration and actions. Edit lines here. |
 | [`narration/generate_narration.py`](narration/generate_narration.py) | Makes one MP3 + SRT per scene with your ElevenLabs voice (key from `ELEVENLABS_API_KEY`). |
 | [`narration/durations.json`](narration/durations.json) | Clip lengths; the graphics are sized from these. |
-| [`remotion/`](remotion/) | The motion graphics as code (React + Remotion). |
+| [`remotion/`](remotion/) | The motion graphics as code (React + Remotion), and the full-video assembly. |
+| [`recorder/`](recorder/) | Drives Databricks in Chrome and records the screen scenes for you. See its README. |
 | `audio/`, `renders/` | Generated narration and graphics. Not in Git. |
 
 ## The pipeline
 
 1. **Narration.** `cd demo-video/narration` then `python generate_narration.py`. It finds your cloned voice, writes `audio/T1-01.mp3` etc., captions, and real lengths into `durations.json`. Listen to each clip; to change a line, edit `scenes.json` and run `python generate_narration.py --only T2-04 --force`.
 2. **Graphics.** `cd demo-video/remotion`, `npm install`, `npm run render:all`. Now they match the audio lengths. `npm run studio` opens a live preview where you can scrub every graphic. All numbers come from `src/data.ts`; fill `benchmark` there if you want the benchmark card.
-3. **Screen recordings** (T2 and T3 only). Follow `shot-lists.md`. Record silently, one clip per `screen` scene, named by scene id. Use a recorder with automatic zoom on clicks:
+3. **Screen recordings** (T2 and T3 only). Either let the recorder do it (see [`recorder/README.md`](recorder/README.md)), then run `npm run assemble` in `remotion/` for finished MP4s with no editing, or record by hand: Follow `shot-lists.md`. Record silently, one clip per `screen` scene, named by scene id. Use a recorder with automatic zoom on clicks:
    - Windows: **FocuSee** or **Tella** (Tella also has a free tier to try).
    - Mac: **Screen Studio**.
    Settings: 1920×1080 browser window, browser zoom 125 % so SQL is readable, light Databricks theme, bookmarks bar and other tabs hidden, notifications off.

@@ -2,6 +2,7 @@ import React from 'react';
 import {Composition} from 'remotion';
 import durations from '../../narration/durations.json';
 import {Spiel30} from './Spiel30';
+import {FullVideo, calcFullVideo} from './FullVideo';
 import {
   AccessRule, BenchmarkCard, CostCallout, EndCard, FutureState, GapIntro, GapSummary, LowerThird, NumberReveal, QuestionCard, SectionCard, TitleCard,
 } from './Graphics';
@@ -38,6 +39,10 @@ export const Root: React.FC = () => {
       <Composition id="EndCard-5min" component={EndCard} durationInFrames={f('T3-14', 2)} defaultProps={{ask: 'A 90-day pilot on people analytics', sub: 'An HR sponsor, a named HR data owner, and about a day a week from one data engineer.'}} {...HD} />
 
       <Composition id="LowerThird-Fictional" component={LowerThird} durationInFrames={s(6)} defaultProps={{title: 'Tema is fictional', sub: '70,000 synthetic people, built at our scale on purpose'}} {...HD} />
+
+      {(['T1', 'T2', 'T3'] as const).map((v) => (
+        <Composition key={v} id={`FullVideo-${v}`} component={FullVideo} calculateMetadata={calcFullVideo} durationInFrames={300} defaultProps={{video: v, blocks: [], audio: [], spielParts: []}} {...HD} />
+      ))}
     </>
   );
 };
