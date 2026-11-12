@@ -104,10 +104,28 @@ export class Director {
     }
   }
 
+  // ---------- pop-ups ----------
+  /** Close Databricks pop-ups (tours, "what's new", feature announcements) that block clicks. */
+  async dismissDialogs() {
+    for (let i = 0; i < 4; i++) {
+      const dlg = this.page.locator('[role="dialog"][aria-modal="true"], [role="alertdialog"]').first();
+      if (!(await dlg.isVisible().catch(() => false))) return;
+      const btn = dlg.getByRole('button', {name: /^(close|got it|dismiss|skip( tour)?|not now|maybe later|no,? thanks|ok|done|continue)$/i}).first();
+      if (await btn.isVisible().catch(() => false)) await btn.click().catch(() => {});
+      else {
+        const x = dlg.locator('button[aria-label*="close" i]').first();
+        if (await x.isVisible().catch(() => false)) await x.click().catch(() => {});
+        else await this.page.keyboard.press('Escape');
+      }
+      await sleep(500);
+    }
+  }
+
   // ---------- finding things ----------
   /** First visible match among candidate locators, or null. */
   async find(candidates, timeout = 8000) {
     const list = Array.isArray(candidates) ? candidates : [candidates];
+    if (!this.recording) await this.dismissDialogs();
     const end = Date.now() + timeout;
     while (Date.now() < end) {
       for (const c of list) {
@@ -262,5 +280,6 @@ export class Director {
       await this.page.goto(url, {waitUntil: 'domcontentloaded', timeout: 120000});
     });
     await this.settle({min: 2, quiet: 2, max: 60});
+    await this.dismissDialogs();
   }
 }
