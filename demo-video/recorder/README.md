@@ -9,8 +9,10 @@ scene fits your narration, and assembles the finished videos.
 
 1. In Databricks:
    - SQL Editor: create a new **empty** query called `Demo recording`, attach your SQL warehouse, save it. Copy its URL.
-   - Copy the URLs of the two Genie spaces (*Tema raw (baseline)* and *People Analytics Assistant*) and of the
-     notebook `hr_people_analytics/governance/02_hrbp_access_activity`. Make sure `01_hrbp_access_model.sql` was run today.
+   - The two Genie spaces (*Tema raw (baseline)* and *People Analytics Assistant*): build them by hand (Week 7), or
+     run `python hr_people_analytics\genie\create_genie_spaces.py` after filling in `workspaceUrl` below. It needs a
+     personal access token in `DATABRICKS_TOKEN`, creates both, tests them and writes their URLs into `config.json`.
+   - Copy the URL of the notebook `hr_people_analytics/governance/02_hrbp_access_activity`. Make sure `01_hrbp_access_model.sql` was run today.
 2. In PowerShell:
    ```
    cd $env:USERPROFILE\Videos\tema-demo\demo-video\recorder

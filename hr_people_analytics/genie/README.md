@@ -4,6 +4,7 @@
 |---|---|
 | [`instructions.md`](instructions.md) | The People Analytics Assistant's instructions, including the lines added after the first benchmark run |
 | [`example_queries.sql`](example_queries.sql) | Trusted example SQL to add to the agent |
+| [`create_genie_spaces.py`](create_genie_spaces.py) | Optional shortcut: creates both agents through the Genie API from these files and asks each the Q2 headcount question |
 | [`benchmark_questions.md`](benchmark_questions.md) | All 20 benchmark questions with expected answers, and empty score columns for your own run |
 
 Genie settings live in the workspace, not in Git, so this folder is the record of what you configured. Set up two agents: **Tema raw (baseline)** on the 12 `tema_hr_raw` tables with no instructions, and **People Analytics Assistant** on the metric views with these instructions and examples.
