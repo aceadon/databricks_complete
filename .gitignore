@@ -19,3 +19,9 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+
+# Demo video: narration audio and rendered graphics stay out of Git
+demo-video/audio/
+demo-video/renders/
+demo-video/remotion/node_modules/
+demo-video/remotion/out/
