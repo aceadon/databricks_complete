@@ -45,6 +45,9 @@ dimensions:
     expr: loc.region
     display_name: Region
 measures:
+  # Every ratio uses try_divide: an empty window (for example a month the trailing range reaches
+  # before the data starts, or a slice with no first-year people) returns NULL instead of a
+  # DIVIDE_BY_ZERO error, which serverless SQL raises because ANSI mode is on.
   # Building blocks over the trailing 12 months ending with the period
   - name: leavers_t12m
     display_name: Leavers (trailing 12 months)
@@ -69,7 +72,7 @@ measures:
         semiadditive: last
   - name: avg_headcount_t12m
     display_name: Average headcount (trailing 12 months)
-    expr: COUNT(1) FILTER (WHERE source.is_active_month_end) / COUNT(DISTINCT source.snapshot_month)
+    expr: try_divide(COUNT(1) FILTER (WHERE source.is_active_month_end), COUNT(DISTINCT source.snapshot_month))
     window:
       - order: month
         range: trailing 12 month
@@ -81,17 +84,17 @@ measures:
     synonyms: ["attrition", "turnover", "attrition rate", "churn"]
     format:
       type: percentage
-    expr: MEASURE(leavers_t12m) / MEASURE(avg_headcount_t12m)
+    expr: try_divide(MEASURE(leavers_t12m), MEASURE(avg_headcount_t12m))
   - name: voluntary_attrition_rate_t12m
     display_name: Voluntary attrition rate (trailing 12 months)
     comment: "People who resigned in the trailing 12 months, divided by the same average headcount as attrition_rate_t12m."
     synonyms: ["voluntary turnover", "resignations rate"]
-    expr: MEASURE(voluntary_leavers_t12m) / MEASURE(avg_headcount_t12m)
+    expr: try_divide(MEASURE(voluntary_leavers_t12m), MEASURE(avg_headcount_t12m))
   - name: regretted_attrition_rate_t12m
     display_name: Regretted attrition rate (trailing 12 months)
     comment: "Leavers the company wanted to keep, divided by the same average headcount as attrition_rate_t12m."
     synonyms: ["regretted turnover", "regretted losses"]
-    expr: MEASURE(regretted_leavers_t12m) / MEASURE(avg_headcount_t12m)
+    expr: try_divide(MEASURE(regretted_leavers_t12m), MEASURE(avg_headcount_t12m))
   # Week 4 "Your turn": people who leave before their one-year mark
   - name: first_year_leavers_t12m
     display_name: First-year leavers (trailing 12 months)
@@ -102,7 +105,7 @@ measures:
         semiadditive: last
   - name: first_year_avg_headcount_t12m
     display_name: First-year average headcount (trailing 12 months)
-    expr: COUNT(1) FILTER (WHERE source.is_active_month_end AND source.is_first_year) / COUNT(DISTINCT source.snapshot_month)
+    expr: try_divide(COUNT(1) FILTER (WHERE source.is_active_month_end AND source.is_first_year), COUNT(DISTINCT source.snapshot_month))
     window:
       - order: month
         range: trailing 12 month
@@ -113,7 +116,7 @@ measures:
     synonyms: ["new hire attrition", "early attrition", "first year turnover"]
     format:
       type: percentage
-    expr: MEASURE(first_year_leavers_t12m) / MEASURE(first_year_avg_headcount_t12m)
+    expr: try_divide(MEASURE(first_year_leavers_t12m), MEASURE(first_year_avg_headcount_t12m))
   # Simple monthly flow, additive over time. Counts everyone, part-time included: it answers
   # "how many people left", not "what is our attrition rate".
   - name: leavers

@@ -55,8 +55,8 @@ measures:
   - name: offer_acceptance_rate
     display_name: Offer acceptance rate
     comment: "Offers accepted divided by offers extended."
-    expr: SUM(source.offers_accepted) / SUM(source.offers_extended)
+    expr: try_divide(SUM(source.offers_accepted), SUM(source.offers_extended))
   - name: applicants_per_hire
     display_name: Applicants per hire
-    expr: SUM(source.applicants) FILTER (WHERE source.status = 'Filled') / COUNT(1) FILTER (WHERE source.status = 'Filled')
+    expr: try_divide(SUM(source.applicants) FILTER (WHERE source.status = 'Filled'), COUNT(1) FILTER (WHERE source.status = 'Filled'))
 $$;

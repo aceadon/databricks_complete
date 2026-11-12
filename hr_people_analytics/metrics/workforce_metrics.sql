@@ -95,8 +95,8 @@ measures:
     display_name: Span of control
     comment: "Active non-managers divided by active managers (manager and executive levels) at the end of the period. A ratio of populations, not the average number of direct reports."
     expr: >
-      COUNT(DISTINCT source.employee_id) FILTER (WHERE source.is_active_month_end AND NOT job.is_manager)
-      / COUNT(DISTINCT source.employee_id) FILTER (WHERE source.is_active_month_end AND job.is_manager)
+      try_divide(COUNT(DISTINCT source.employee_id) FILTER (WHERE source.is_active_month_end AND NOT job.is_manager),
+                 COUNT(DISTINCT source.employee_id) FILTER (WHERE source.is_active_month_end AND job.is_manager))
     window:
       - order: month
         range: current
