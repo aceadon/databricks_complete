@@ -1,7 +1,7 @@
 // Records the Databricks screen scenes for the demo videos.
 //
 //   npm install                 once
-//   npm run login               once: a Chrome window opens, log in to Databricks, press Enter here
+//   npm run chrome              starts your Chrome with the recording profile; log in to Databricks there (once)
 //   npm run warmup              optional: runs the queries once so the warehouse is warm
 //   npm run record              records every scene (or: node record.mjs --scene T2-02,T3-06)
 //
@@ -41,16 +41,36 @@ const ask = (q) =>
 
 // 1536x864 CSS px at 125% = 1920x1080 frames: the "zoomed browser" look, readable on video.
 const viewport = {width: 1536, height: 864};
-const context = await chromium.launchPersistentContext(opt('profile') ?? join(HERE, '.profile'), {
-  channel: c.browserChannel || undefined,
-  headless: flag('headless'),
-  viewport,
-  deviceScaleFactor: 1.25,
-  colorScheme: 'light',
-  args: ['--hide-scrollbars', '--disable-infobars', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding', '--disable-background-timer-throttling'],
-  ignoreDefaultArgs: ['--enable-automation'],
-});
-const page = context.pages()[0] ?? (await context.newPage());
+// Preferred: attach to the Chrome started by `npm run chrome` (real Chrome, so Google sign-in works).
+// Fallback: launch an automated Chrome with its own profile.
+const cdpUrl = `http://127.0.0.1:${c.cdpPort ?? 9222}`;
+let browser = null;
+let context;
+let page;
+if (!flag('launch')) {
+  try {
+    browser = await chromium.connectOverCDP(cdpUrl, {timeout: 5000});
+  } catch {
+    console.log('No Chrome from `npm run chrome` found; launching one instead (Google sign-in may be blocked there).');
+  }
+}
+if (browser) {
+  context = browser.contexts()[0];
+  page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setDeviceMetricsOverride', {...viewport, deviceScaleFactor: 1.25, mobile: false});
+} else {
+  context = await chromium.launchPersistentContext(opt('profile') ?? join(HERE, '.profile'), {
+    channel: c.browserChannel || undefined,
+    headless: flag('headless'),
+    viewport,
+    deviceScaleFactor: 1.25,
+    colorScheme: 'light',
+    args: ['--hide-scrollbars', '--disable-infobars', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding', '--disable-background-timer-throttling'],
+    ignoreDefaultArgs: ['--enable-automation'],
+  });
+  page = context.pages()[0] ?? (await context.newPage());
+}
 const d = new Director(page, {
   outRoot: opt('out') ?? join(HERE, '..', 'remotion', 'public', 'capture'),
   viewport,
@@ -70,7 +90,7 @@ try {
     const unknown = want.filter((id) => !SCENES[id]);
     if (unknown.length) throw new Error(`Unknown scene(s): ${unknown.join(', ')}. Known: ${Object.keys(SCENES).join(', ')}`);
     await page.goto(c.workspaceUrl, {waitUntil: 'domcontentloaded'});
-    if (/login|signin|oauth/i.test(page.url())) throw new Error('Not logged in. Run: npm run login');
+    if (/login|signin|oauth/i.test(page.url())) throw new Error('Not logged in. Log in to Databricks in the Chrome window from `npm run chrome`, then try again.');
     const failed = [];
     for (const id of want) {
       const s = SCENES[id];
@@ -95,5 +115,8 @@ try {
     console.log('Next: cd ../remotion && npm run assemble');
   }
 } finally {
-  await context.close();
+  if (browser) {
+    await page.close().catch(() => {}); // leave your Chrome window open
+    await browser.close().catch(() => {});
+  } else await context.close();
 }

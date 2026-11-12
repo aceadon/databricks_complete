@@ -20,9 +20,12 @@ scene fits your narration, and assembles the finished videos.
    npm install
    copy config.example.json config.json
    notepad config.json        # paste the URLs, check the employee for the salary question
-   npm run login              # log in to Databricks in the window that opens, then press Enter in PowerShell
+   npm run chrome             # starts Chrome with a separate recording profile; log in to Databricks there
    ```
-   The login is kept in `recorder\.profile`, so you only do this once. That folder is yours only and is not in Git.
+   Chrome started this way is a normal Chrome, so Google sign-in works; the recorder attaches to it. The login is
+   kept in `recorder\.chrome-profile`, so you only log in once. Run `npm run chrome` again before each recording
+   session if you've closed that window. (`npm run login` is the older way: an automated Chrome, where Google blocks
+   sign-in, but Databricks' "email me a code" login works.)
 
 ## Recording
 

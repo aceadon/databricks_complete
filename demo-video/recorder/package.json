@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Drives Databricks in Chrome and records each screen scene of the demo videos",
   "scripts": {
+    "chrome": "node chrome.mjs",
     "login": "node record.mjs --login",
     "warmup": "node record.mjs --warmup",
     "record": "node record.mjs"

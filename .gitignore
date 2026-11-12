@@ -31,3 +31,4 @@ demo-video/recorder/.profile/
 demo-video/recorder/failed-*.png
 demo-video/remotion/public/capture/
 demo-video/remotion/public/audio/
+demo-video/recorder/.chrome-profile/
