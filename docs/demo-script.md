@@ -13,3 +13,5 @@ Run on the 70,000-person Tema. Every query is in this repo; the SQL editor tab o
 **Before you present:** rerun `reference/00_build_reference` and the governance model on the 70,000-person data the same day (HRBP scope uses today's date), open each tab, and run every query once so the warehouse is warm. Keep the Workforce Overview dashboard open as the fallback if a live query is slow.
 
 **Likely questions:** "Can't Power BI do this?" (it can for its own users; this works for SQL, Genie and every BI tool at once). "Who maintains it?" (metric owners via pull requests; one engineer part-time). "Is it safe to point AI at HR data?" (only through governed metrics with suppression, which is what the demo shows).
+
+Shorter versions (30 seconds, 2 minutes, 5 minutes) built on Gap Selling are in [demo-scripts-gap-selling.md](demo-scripts-gap-selling.md).
