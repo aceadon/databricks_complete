@@ -169,12 +169,12 @@ export const SectionCard: React.FC<{n: number; title: string; who: string}> = ({
   );
 };
 
-export const QuestionCard: React.FC<{q: string}> = ({q}) => (
+export const QuestionCard: React.FC<{q: string; statement?: boolean}> = ({q, statement = false}) => (
   <Bg>
     <SceneOut>
       <AbsoluteFill style={{...pad, justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
         <Rise>
-          <div style={{fontSize: 180, color: C.good, fontWeight: 800, lineHeight: 0.8}}>?</div>
+          {!statement && <div style={{fontSize: 180, color: C.good, fontWeight: 800, lineHeight: 0.8}}>?</div>}
         </Rise>
         <Rise delay={8}>
           <div style={{fontSize: 76, fontWeight: 700, maxWidth: 1500, lineHeight: 1.2, marginTop: 30}}>{q}</div>
@@ -257,7 +257,7 @@ export const AccessRule: React.FC = () => {
           </Rise>
           <Rise delay={6}>
             <div style={{fontSize: 56, fontWeight: 700, marginTop: 14, maxWidth: 1600, lineHeight: 1.2}}>
-              An HR business partner sees sensitive data for the <span style={{color: C.good}}>whole orgs</span> of the leaders they{' '}
+              An HR business partner sees sensitive data for the <span style={{color: C.good}}>orgs</span> of the leaders they{' '}
               <span style={{color: C.good}}>currently support</span>.
             </div>
           </Rise>
@@ -310,13 +310,13 @@ export const GapSummary: React.FC = () => (
             title="Today"
             color={C.accent}
             delay={10}
-            items={['Tables arrive in Databricks', 'Definitions live in people’s heads', 'Access lives in a spreadsheet', 'AI is off limits for HR data']}
+            items={['Tables arrive in Databricks', 'Definitions live in people’s heads', 'Access lives in a spreadsheet', 'AI is off limits, or not trusted']}
           />
           <Col
             title="Future state"
             color={C.good}
             delay={130}
-            items={['Every HR number certified once, the same everywhere', 'Sensitive data governed by one auditable rule', 'Definitions change only by reviewed pull request', 'An AI assistant HRBPs can actually use']}
+            items={['Every HR number certified once, the same everywhere', 'Sensitive data governed by one auditable rule', 'Definitions change only by reviewed pull request', 'An AI assistant whose HR answers the business can use']}
           />
         </div>
       </AbsoluteFill>
@@ -336,12 +336,12 @@ export const FutureState: React.FC = () => (
             title=""
             color={C.good}
             delay={6}
-            items={['One certified definition per metric, with a named owner', 'One access rule', 'Every tool, including AI, reading from it']}
+            items={['One certified definition per metric, with a named owner', 'One access rule', 'Every tool, including AI, reading only what the user may see']}
           />
         </div>
         <Rise delay={70}>
           <div style={{fontSize: 46, fontWeight: 700, marginTop: 80}}>
-            The migration is the foundation. <span style={{color: C.good}}>This is what makes HR trust it.</span>
+            The migration is the foundation. <span style={{color: C.good}}>This is what makes it trustworthy and secure for HR.</span>
           </div>
         </Rise>
       </AbsoluteFill>

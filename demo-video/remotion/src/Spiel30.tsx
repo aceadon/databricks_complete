@@ -131,7 +131,7 @@ const FiveAttritions: React.FC = () => {
 
 const Layer: React.FC = () => {
   const band = useIn(20);
-  const tools = ['SQL', 'Dashboards', 'Power BI', 'Genie (AI)'];
+  const tools = ['Tableau dashboards', 'SQL queries', 'AI agents'];
   return (
     <Bg>
       <AbsoluteFill style={{padding: '90px 180px', justifyContent: 'center'}}>
@@ -181,7 +181,7 @@ const Layer: React.FC = () => {
 
 /** The whole 30-second spiel. `parts` are the five scene lengths in frames (from the narration audio). */
 export const Spiel30: React.FC<{parts: number[]}> = ({parts}) => {
-  const comps = [MoveTables, TwoAnswers, FiveAttritions, Layer, () => <QuestionCard q="How much time does your team spend reconciling numbers before a leadership review?" />];
+  const comps = [MoveTables, TwoAnswers, FiveAttritions, Layer, () => <QuestionCard statement q="The table migration is the foundation. The semantic layer delivers trust." />];
   let from = 0;
   return (
     <AbsoluteFill style={{background: C.bg}}>

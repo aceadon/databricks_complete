@@ -78,6 +78,40 @@ def pick_voice(args):
     return m[0]["voice_id"], m[0]["name"]
 
 
+# Ashley's rule: numbers are spoken as words. scenes.json already spells them out; this catches any
+# digits added later (2025 -> "twenty twenty-five", 58,862 -> "fifty-eight thousand, eight hundred sixty-two").
+# Digits glued to letters, like "Q2", are left alone.
+ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split()
+TENS = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()
+
+
+def words(n):
+    if n < 20:
+        return ONES[n]
+    if n < 100:
+        return TENS[n // 10] + ("-" + ONES[n % 10] if n % 10 else "")
+    if n < 1000:
+        return ONES[n // 100] + " hundred" + (" " + words(n % 100) if n % 100 else "")
+    for size, name in ((10**9, "billion"), (10**6, "million"), (1000, "thousand")):
+        if n >= size:
+            rest = n % size
+            return words(n // size) + " " + name + ((", " if rest >= 100 else " ") + words(rest) if rest else "")
+
+
+def spell_numbers(text):
+    def one(m):
+        raw = m.group(0)
+        n = int(raw.replace(",", ""))
+        if "," not in raw and len(raw) == 4 and (1900 <= n <= 1999 or 2010 <= n <= 2099):  # a year
+            hi, lo = divmod(n, 100)
+            return words(hi) + " " + ("hundred" if lo == 0 else ("oh " + ONES[lo] if lo < 10 else words(lo)))
+        return words(n)
+
+    parts = re.split(r"(<[^>]+>)", text)  # leave <break time="0.4s" /> tags alone
+    num = r"(?<![\w.,])(?:\d{1,3}(?:,\d{3})+|\d+)(?!\w|[.,]\d)"
+    return "".join(pt if pt.startswith("<") else re.sub(num, one, pt) for pt in parts)
+
+
 def srt_time(t):
     ms = int(round(t * 1000))
     return f"{ms // 3600000:02}:{ms // 60000 % 60:02}:{ms // 1000 % 60:02},{ms % 1000:03}"
@@ -146,7 +180,7 @@ def main():
                 print(f"  {sc['id']}: exists, skipped (use --force to redo)")
                 continue
             plain = lambda t: re.sub(r"<[^>]+>", "", t)
-            body = {"text": sc["text"], "model_id": MODEL, "voice_settings": SETTINGS}
+            body = {"text": spell_numbers(sc["text"]), "model_id": MODEL, "voice_settings": SETTINGS}
             # Neighbouring lines keep intonation consistent across separate clips.
             if i > 0:
                 body["previous_text"] = plain(scenes[i - 1]["text"])

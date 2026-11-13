@@ -19,7 +19,7 @@
           "visual": "graphic",
           "graphic": "Spiel30 (part 2: one table, two answers)",
           "action": "None.",
-          "text": "And tables arrive without their meaning. Ask the same table for headcount at the end of Q2, and you get 58,862. <break time=\"0.3s\" /> Or 175,524. Depending on who writes the query."
+          "text": "And tables arrive without their meaning. Ask the same table for headcount at the end of Q2, and you get fifty-eight thousand, eight hundred sixty-two. <break time=\"0.3s\" /> Or one hundred seventy-five thousand, five hundred twenty-four. Depending on who writes the query."
         },
         {
           "id": "T1-03",
@@ -33,14 +33,14 @@
           "visual": "graphic",
           "graphic": "Spiel30 (part 4: the semantic layer)",
           "action": "None.",
-          "text": "So I built a thin layer on top. A semantic layer. Every HR metric, and every access rule, defined once. So dashboards, Power BI, and AI all give the same answer."
+          "text": "A semantic layer inside of Databricks defines every HR metric, and every access rule, once. So Tableau dashboards, Sequel queries, and AI agents all give the same answer."
         },
         {
           "id": "T1-05",
           "visual": "graphic",
-          "graphic": "Spiel30 (part 5: the question)",
+          "graphic": "Spiel30 (part 5: the closing line)",
           "action": "None. Hold on the question for two seconds of silence before the end.",
-          "text": "How much time does your team spend reconciling numbers before a leadership review?"
+          "text": "The table migration is the foundation. This is the part that delivers trust."
         }
       ]
     },
@@ -55,28 +55,28 @@
           "visual": "graphic",
           "graphic": "TitleCard (2-minute variant), then GapIntro",
           "action": "None.",
-          "text": "Our Databricks rollout is moving HR's tables across. What it doesn't move is the definitions. What counts as headcount. What counts as attrition. Who's allowed to see salary. Today, each of those lives in somebody's query, or somebody's spreadsheet. <break time=\"0.4s\" /> Let me show you what that means, in about a minute. This is Tema, a fictional company of 70,000 people. About our size."
+          "text": "Our Databricks rollout is moving HR's tables across. What it doesn't move is the definitions. What counts as headcount? What counts as attrition? Who's allowed to see salary? Today, each of those lives in somebody's query, dashboard, or spreadsheet. <break time=\"0.4s\" /> Let's look at an example of what I mean, and how Databricks can solve this, in about a minute. This is Tema, a fictional tech company of about seventy thousand people."
         },
         {
           "id": "T2-02",
           "visual": "screen",
           "graphic": "LowerThird: 'Tema is fictional: 70,000 synthetic people'",
           "action": "SQL editor, workforce_checks.sql. Put the cursor in the naive query (SUM(headcount) FROM v_headcount_naive, 2025-Q2) and run it. Let the result 175,524 sit on screen.",
-          "text": "Here's headcount at the end of the second quarter of 2025, straight from the migrated table. <break time=\"0.3s\" /> 175,524. For a company of 70,000."
+          "text": "Here's a query that returns the headcount at the end of the second quarter of twenty twenty-five, straight from the migrated table. <break time=\"0.3s\" /> One hundred seventy-five thousand, five hundred twenty-four. For a company of seventy thousand."
         },
         {
           "id": "T2-03",
           "visual": "screen",
           "graphic": "None",
           "action": "Select (highlight) the SUM(headcount) and GROUP BY in the naive query so the zoom lands on it.",
-          "text": "That's what happens when someone adds up April, May, and June. A perfectly reasonable query. The wrong answer. And nothing warns you."
+          "text": "That's what happens when someone adds up April, May, and June. A perfectly reasonable query. The wrong answer. And nothing warns you if this is the query an AI agent writes."
         },
         {
           "id": "T2-04",
           "visual": "screen",
           "graphic": "None",
           "action": "Click into the metric view query (MEASURE(headcount) FROM workforce_metrics, 2025-Q2) and run it. Hover over 58,862.",
-          "text": "Same table, same question, through the semantic layer. <break time=\"0.3s\" /> 58,862. The rule, headcount is the last month of the period, never a sum, lives in the definition. So nobody can get it wrong. Not in SQL, not in the dashboard, not in Power BI, and not in Genie."
+          "text": "Same table, same question, through the semantic layer. <break time=\"0.3s\" /> fifty-eight thousand, eight hundred sixty-two. The rule, headcount is the last month of the period, never a sum, lives in the definition. So nobody can get it wrong. Not in SQL, not in the dashboard, not in Power BI, and not in Genie."
         },
         {
           "id": "T2-05",
@@ -90,14 +90,14 @@
           "visual": "graphic",
           "graphic": "CostCallout (Tema-wide only)",
           "action": "None.",
-          "text": "And headcount is the easy one. Attrition is where it costs money. Once Tema had one definition of attrition, it could finally see that regretted leavers cost about 190 million dollars a year."
+          "text": "And headcount is the easy one. Attrition is where it costs money. Once Tema had one definition of attrition, it could finally see that regretted leavers cost about one hundred ninety million dollars a year."
         },
         {
           "id": "T2-07",
           "visual": "graphic",
-          "graphic": "FutureState, then EndCard",
+          "graphic": "FutureState",
           "action": "None.",
-          "text": "That's the future state. One certified definition per metric, with a named owner. One access rule. And every tool, including AI, reading from it. The migration is the foundation. This is the part that makes HR trust it. <break time=\"0.4s\" /> If this sounds familiar, let's find thirty minutes to see whether it would work here."
+          "text": "That's the future state. One certified definition per metric, with a named owner. One access rule. And every tool, including AI, reading from it only what the user is allowed to see. The migration is the foundation. This is the part that makes it trustworthy and secure for HR."
         }
       ]
     },
@@ -112,14 +112,14 @@
           "visual": "graphic",
           "graphic": "TitleCard (5-minute variant), then GapIntro",
           "action": "None.",
-          "text": "Quick context. We're rolling out Databricks, and the plan is to move our HR tables there. That's necessary, but it's only the first half. Three things don't move with the tables. What our numbers mean. What AI is allowed to answer. And who's allowed to see sensitive people data. <break time=\"0.4s\" /> Today those live in individual queries, BI tool settings, and a coverage spreadsheet. So we reconcile numbers before reviews, we're nervous about pointing AI at HR data, and HR business partner access breaks at every reorg. I built a working version of the fix, on a fictional 70,000-person company called Tema. Three things, five minutes."
+          "text": "We're rolling out Databricks, and Data Engineering is moving our HR tables there. Three things don't move with the tables. What our numbers mean. What AI is allowed to answer. And who's allowed to see sensitive people data. <break time=\"0.4s\" /> Today those live in individual queries, BI tool settings, and spreadsheets. So we manually reconcile numbers before leadership reviews, we're nervous about pointing AI at HR data, and sensitive data access could break at any transfer or reorg. To demonstrate how Databricks can address all of these, the team built a working demo, on a fictional seventy-thousand-person company called Tema. In the next four minutes, you'll learn three ways we're designing Databricks to serve the needs of People Analytics."
         },
         {
           "id": "T3-02",
           "visual": "screen",
           "graphic": "SectionCard 1 before the clip; LowerThird 'Tema is fictional' on the clip",
           "action": "SQL editor, workforce_checks.sql. Run the naive headcount (175,524), pause, then run the metric view headcount (58,862).",
-          "text": "First, the numbers don't agree. Here's headcount at the end of the second quarter of 2025, from the migrated table. 175,524. <break time=\"0.3s\" /> And here's the same table, same question, through the semantic layer. 58,862. Someone added up three months, and nothing stopped them."
+          "text": "First, the numbers don't agree. Here's headcount at the end of the second quarter of twenty twenty-five, from the migrated table. One hundred seventy-five thousand, five hundred twenty-four. <break time=\"0.3s\" /> And here's the same table, same question, through the semantic layer. Fifty-eight thousand, eight hundred sixty-two. Someone, or some AI agent, wrote a valid Sequel query and added up three months. There were neither rules nor context to guide them to the right answer, so they confidently returned the wrong number."
         },
         {
           "id": "T3-03",
@@ -133,21 +133,21 @@
           "visual": "graphic",
           "graphic": "CostCallout (with the AI team breakdown)",
           "action": "None.",
-          "text": "And because attrition now means one thing, we can cost it. Tema lost 2,782 regretted leavers in the last twelve months. That's about 190 million dollars a year to replace them, at half a salary each. The AI team alone, which grew about sixfold, accounts for 503 of them. About 67 million dollars."
+          "text": "And because attrition now means precisely one thing, and is defined next to other metrics like time to fill and salary, we can evaluate the cost of regrettable attrition. In our example, Tema regrettably lost two thousand, seven hundred eighty-two employees in the last twelve months. That's about one hundred ninety million dollars a year to replace them, at half a salary each. The AI team alone, which grew about sixfold, accounts for five hundred three of them, at a cost of about sixty-seven million dollars."
         },
         {
           "id": "T3-05",
           "visual": "graphic",
-          "graphic": "QuestionCard: 'If we had one attrition number we trusted, what's the first decision you'd use it for?'",
+          "graphic": "QuestionCard: the cost-of-attrition question",
           "action": "None.",
-          "text": "If we had one attrition number we trusted, what's the first decision you'd use it for?"
+          "text": "If every VP, HRBP, and leader had access to their team's or organization's cost of attrition, what decisions could we make to transform our company?"
         },
         {
           "id": "T3-06",
           "visual": "screen",
           "graphic": "SectionCard 2 before the clip",
           "action": "Genie, two tabs side by side (or record each tab and place them side by side in the editor). Ask both: 'How many people did we have at the end of Q2 2025?' Wait for both answers.",
-          "text": "Second, AI gives confident, wrong answers. Here's the same question, asked of Genie on the raw tables, and of our People Analytics Assistant on the semantic layer. The raw one adds up the months. The assistant answers 58,862."
+          "text": "Second, AI gives confident, wrong answers. Here's the same question, asked of Genie on the raw tables, and of our Analytics Assistant on the semantic layer. The raw one adds up the months. The assistant answers fifty-eight thousand, eight hundred sixty-two."
         },
         {
           "id": "T3-07",
@@ -161,7 +161,7 @@
           "visual": "graphic",
           "graphic": "BenchmarkCard (fill in scores in src/data.ts, or skip this graphic)",
           "action": "None.",
-          "text": "Same AI, same data. The difference is the definitions and rules underneath. On a twenty-question benchmark, the agent on the semantic layer got far more right than the one on raw tables. AI is only as good as the definitions under it, and the semantic layer is what makes it safe to give HR an AI assistant."
+          "text": "Same AI, same data. The difference is the definitions and rules underneath. On a twenty-question benchmark, the agent on the semantic layer got far more right than the one on raw tables. AI is only as good as the definitions under it, and the semantic layer is what makes it safe to give HR data to an AI assistant."
         },
         {
           "id": "T3-09",
@@ -189,21 +189,14 @@
           "visual": "graphic",
           "graphic": "AccessRule",
           "action": "None.",
-          "text": "It's one rule in Unity Catalog. An HR business partner sees sensitive data for the whole orgs of the leaders they currently support. It's computed from the reporting lines and dated assignments. It handles partners with several leaders, and leaders with several partners. It keeps executives out. And it applies the same way in SQL, dashboards, BI tools, and Genie. Reorgs fix themselves overnight."
+          "text": "This dynamic access is just one rule in Unity Catalog. An HR business partner sees sensitive data for the orgs of the leaders they currently support. It's computed from the reporting lines and dated assignments. It handles partners with several leaders, and leaders with several partners. It keeps executives out. And it applies the same way in Sequel, dashboards, BI tools, and Genie. Reorgs fix themselves overnight."
         },
         {
           "id": "T3-13",
           "visual": "graphic",
           "graphic": "GapSummary",
           "action": "None.",
-          "text": "So here's the gap. Today, tables arrive in Databricks, definitions live in people's heads, access lives in a spreadsheet, and AI is off limits. <break time=\"0.4s\" /> The future state: every HR number certified once, and the same everywhere. Sensitive data governed by one auditable rule. Definitions changed only by reviewed pull request. And an AI assistant HR business partners can actually use."
-        },
-        {
-          "id": "T3-14",
-          "visual": "graphic",
-          "graphic": "EndCard (pilot ask)",
-          "action": "None.",
-          "text": "It doesn't compete with the migration. It reuses the migrated tables, adds a thin layer on top, and gives the migration team a definition of done. The ask is a 90-day pilot on people analytics. An HR sponsor, a named HR data owner, and about a day a week from one data engineer. <break time=\"0.4s\" /> Who else should see this?"
+          "text": "So here's the gap. Today, tables arrive in Databricks, definitions live in people's heads, access lives in a spreadsheet, and AI is off limits or struggles to earn users' trust. <break time=\"0.4s\" /> The future state: every HR number certified once, and the same everywhere. Sensitive data governed by one auditable rule. Definitions changed only by reviewed pull request. And an AI assistant that consistently returns HR data that the business can actually use."
         }
       ]
     }

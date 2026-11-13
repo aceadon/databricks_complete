@@ -25,7 +25,7 @@ const PLAN: Record<string, Part[]> = {
   'T2-04': [{screen: true}],
   'T2-05': [{g: 'NumberReveal'}],
   'T2-06': [{g: 'CostCallout-Tema'}],
-  'T2-07': [{g: 'FutureState'}, {g: 'EndCard-2min', sec: 6}],
+  'T2-07': [{g: 'FutureState'}],
   'T3-01': [{g: 'TitleCard-5min', sec: 4}, {g: 'GapIntro'}],
   'T3-02': [{g: 'SectionCard-1', sec: 3.5}, {screen: true}],
   'T3-03': [{screen: true}],
@@ -39,7 +39,6 @@ const PLAN: Record<string, Part[]> = {
   'T3-11': [{screen: true}],
   'T3-12': [{g: 'AccessRule'}],
   'T3-13': [{g: 'GapSummary'}],
-  'T3-14': [{g: 'EndCard-5min'}],
 };
 const LOWER_THIRD_ON = new Set(['T2-02', 'T3-02']);
 
@@ -56,8 +55,8 @@ const GRAPHICS = {
   'SectionCard-1': () => <SectionCard n={1} title={'The numbers don’t agree'} who="HR leadership · HR operations · People Analytics" />,
   'SectionCard-2': () => <SectionCard n={2} title="AI gives confident, wrong answers" who="Anyone excited about Genie" />,
   'SectionCard-3': () => <SectionCard n={3} title={'Access doesn’t follow the org'} who="HRBPs · Security · Legal" />,
-  'QuestionCard-Attrition': () => <QuestionCard q={'If we had one attrition number we trusted, what’s the first decision you’d use it for?'} />,
-  'Statement-AI': () => <QuestionCard q="Same AI, same data. AI is only as good as the definitions under it." />,
+  'QuestionCard-Attrition': () => <QuestionCard q={'If every VP, HRBP, and leader could see their org’s cost of attrition, what decisions could we make to transform our company?'} />,
+  'Statement-AI': () => <QuestionCard statement q="Same AI, same data. AI is only as good as the definitions under it." />,
   BenchmarkCard: () => <BenchmarkCard />,
   AccessRule: () => <AccessRule />,
   GapSummary: () => <GapSummary />,

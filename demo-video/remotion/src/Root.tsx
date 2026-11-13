@@ -26,17 +26,15 @@ export const Root: React.FC = () => {
       <Composition id="NumberReveal" component={NumberReveal} durationInFrames={Math.max(f('T2-05'), s(7))} {...HD} />
       <Composition id="CostCallout-Tema" component={CostCallout} durationInFrames={f('T2-06')} defaultProps={{withAI: false}} {...HD} />
       <Composition id="CostCallout-AI" component={CostCallout} durationInFrames={f('T3-04')} defaultProps={{withAI: true}} {...HD} />
-      <Composition id="FutureState" component={FutureState} durationInFrames={Math.max(f('T2-07') - s(5), s(8))} {...HD} />
-      <Composition id="EndCard-2min" component={EndCard} durationInFrames={s(7)} defaultProps={{ask: 'Thirty minutes to see if this works here?', sub: 'One certified definition per metric, one access rule, every tool reading from it.'}} {...HD} />
+      <Composition id="FutureState" component={FutureState} durationInFrames={Math.max(f('T2-07'), s(8))} {...HD} />
 
       <Composition id="SectionCard-1" component={SectionCard} durationInFrames={s(3.5)} defaultProps={{n: 1, title: 'The numbers don’t agree', who: 'HR leadership · HR operations · People Analytics'}} {...HD} />
       <Composition id="SectionCard-2" component={SectionCard} durationInFrames={s(3.5)} defaultProps={{n: 2, title: 'AI gives confident, wrong answers', who: 'Anyone excited about Genie'}} {...HD} />
       <Composition id="SectionCard-3" component={SectionCard} durationInFrames={s(3.5)} defaultProps={{n: 3, title: 'Access doesn’t follow the org', who: 'HRBPs · Security · Legal'}} {...HD} />
-      <Composition id="QuestionCard-Attrition" component={QuestionCard} durationInFrames={f('T3-05', 2)} defaultProps={{q: 'If we had one attrition number we trusted, what’s the first decision you’d use it for?'}} {...HD} />
+      <Composition id="QuestionCard-Attrition" component={QuestionCard} durationInFrames={f('T3-05', 2)} defaultProps={{q: 'If every VP, HRBP, and leader could see their org’s cost of attrition, what decisions could we make to transform our company?'}} {...HD} />
       <Composition id="BenchmarkCard" component={BenchmarkCard} durationInFrames={f('T3-08')} {...HD} />
       <Composition id="AccessRule" component={AccessRule} durationInFrames={f('T3-12')} {...HD} />
       <Composition id="GapSummary" component={GapSummary} durationInFrames={f('T3-13')} {...HD} />
-      <Composition id="EndCard-5min" component={EndCard} durationInFrames={f('T3-14', 2)} defaultProps={{ask: 'A 90-day pilot on people analytics', sub: 'An HR sponsor, a named HR data owner, and about a day a week from one data engineer.'}} {...HD} />
 
       <Composition id="LowerThird-Fictional" component={LowerThird} durationInFrames={s(6)} defaultProps={{title: 'Tema is fictional', sub: '70,000 synthetic people, built at our scale on purpose'}} {...HD} />
 
