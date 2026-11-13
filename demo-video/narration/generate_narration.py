@@ -15,6 +15,8 @@ ELEVENLABS_API_KEY environment variable and is never printed or written anywhere
   python generate_narration.py --only T1             # one video
   python generate_narration.py --only T2-04 --force  # redo one scene
   python generate_narration.py --list-voices
+  python generate_narration.py --voice-info          # which models your voice is tuned for
+  python generate_narration.py --model eleven_v4 --only T1-02 --force   # try Eleven v4 on one line
 """
 import argparse
 import base64
@@ -31,7 +33,7 @@ HERE = Path(__file__).resolve().parent
 AUDIO = HERE.parent / "audio"
 # Ashley's "demo-voice-remix1" (set 2026-11-13). --voice-id or --voice-name override it.
 DEFAULT_VOICE_ID = "qZSejYSnvHeHshc7ymtE"
-MODEL = "eleven_multilingual_v2"  # supports <break time="0.4s" /> tags
+MODEL = "eleven_multilingual_v2"  # supports <break time="0.4s" /> tags. --model eleven_v4 tries Eleven v4.
 SETTINGS = {"stability": 0.5, "similarity_boost": 0.8, "style": 0.0, "use_speaker_boost": True, "speed": 1.0}
 
 
@@ -156,6 +158,8 @@ def main():
     p.add_argument("--only", nargs="*", help="video ids (T1) or scene ids (T2-04)")
     p.add_argument("--force", action="store_true", help="regenerate clips that already exist")
     p.add_argument("--list-voices", action="store_true")
+    p.add_argument("--voice-info", action="store_true", help="show the voice's type and the models it is tuned for")
+    p.add_argument("--model", default=MODEL, help=f"ElevenLabs model id (default {MODEL}; try eleven_v4)")
     args = p.parse_args()
 
     if args.list_voices:
@@ -164,7 +168,17 @@ def main():
         return
 
     voice_id, voice_name = pick_voice(args)
-    print(f"Voice: {voice_name}")
+    if args.voice_info:
+        v = call("GET", f"/voices/{voice_id}")
+        print(f"Name: {v.get('name')}   type: {v.get('category')}")
+        print(f"High-quality models for this voice: {', '.join(v.get('high_quality_base_model_ids') or []) or 'none listed'}")
+        ft = (v.get("fine_tuning") or {}).get("state") or {}
+        if ft:
+            print("Professional clone training per model: " + ", ".join(f"{m}={st}" for m, st in ft.items()))
+        return
+    model = args.model
+    v2_style = model.startswith("eleven_multilingual_v2") or model.startswith("eleven_turbo") or model.startswith("eleven_flash")
+    print(f"Voice: {voice_name}   model: {model}")
     data = json.loads((HERE / "scenes.json").read_text(encoding="utf-8"))
     dpath = HERE / "durations.json"
     durations = json.loads(dpath.read_text(encoding="utf-8")) if dpath.exists() else {}
@@ -180,11 +194,14 @@ def main():
                 print(f"  {sc['id']}: exists, skipped (use --force to redo)")
                 continue
             plain = lambda t: re.sub(r"<[^>]+>", "", t)
-            body = {"text": spell_numbers(sc["text"]), "model_id": MODEL, "voice_settings": SETTINGS}
-            # Neighbouring lines keep intonation consistent across separate clips.
-            if i > 0:
+            text = spell_numbers(sc["text"])
+            if not v2_style:  # newer models take [pause] audio tags instead of <break> tags
+                text = re.sub(r"<break[^>]*/>", "[pause]", text)
+            body = {"text": text, "model_id": model, "voice_settings": SETTINGS}
+            # Neighbouring lines keep intonation consistent across separate clips (v2-style models).
+            if v2_style and i > 0:
                 body["previous_text"] = plain(scenes[i - 1]["text"])
-            if i < len(scenes) - 1:
+            if v2_style and i < len(scenes) - 1:
                 body["next_text"] = plain(scenes[i + 1]["text"])
             r = call("POST", f"/text-to-speech/{voice_id}/with-timestamps?output_format=mp3_44100_128", body)
             mp3.write_bytes(base64.b64decode(r["audio_base64"]))
