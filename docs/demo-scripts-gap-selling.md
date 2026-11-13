@@ -49,7 +49,7 @@ No screen. Say it, then ask the question and stop talking.
 >
 > **(Problem and impact)** The tables arrive without their meaning. Ask "what was our headcount at the end of Q2?" of the same migrated table and you can get 58,862 or 175,524, depending on who writes the query. Attrition has five versions. And the rule about which HRBP can see whose salary lives in a spreadsheet.
 >
-> **(Future state)** What I've built is a thin layer on top, a semantic layer: every HR metric defined once, with an owner, and the access rules defined once, so dashboards, Power BI and AI all give the same answer and respect the same privacy rules.
+> **(Future state)** What I've built is a thin layer on top, a semantic layer: every HR metric defined once, with an owner, and the access rules defined once, so Tableau dashboards, SQL queries and AI agents all give the same answer and respect the same privacy rules.
 >
 > **(Gap, as a question)** How much time does your team spend reconciling numbers before a leadership review?
 
@@ -71,7 +71,7 @@ One query tab open in the SQL editor: [`metrics/checks/workforce_checks.sql`](..
 
 1. Run the naive query. "Headcount at the end of Q2 2025, straight from the migrated table: **175,524**. For a company of 70,000."
 2. "That's what happens when someone adds up April, May and June. Perfectly reasonable query, wrong answer, and nothing warns you."
-3. Run the metric view query. "Same table, same question, through the semantic layer: **58,862**. The rule 'headcount is the last month of the period, never a sum' lives in the definition, so nobody can get it wrong, in SQL, the dashboard, Power BI or Genie."
+3. Run the metric view query. "Same table, same question, through the semantic layer: **58,862**. The rule 'headcount is the last month of the period, never a sum' lives in the definition, so nobody can get it wrong, in SQL, on a dashboard, or with an AI agent."
 4. **Anchor (Keenan's check):** "Has a number like the first one ever reached a leadership deck here?"
 
 **1:30 to 2:00. Impact, future state and the ask**
@@ -177,7 +177,7 @@ Gap Selling only works when the current state is the listener's, not Tema's. Use
 
 ## Quick answers to common pushback
 
-- **"Can't Power BI do this?"** For its own users, yes. This defines the metric once for SQL, dashboards, every BI tool and AI at the same time, so they can't drift apart.
+- **"Can't Tableau do this?"** For its own users, yes. This defines the metric once for SQL, dashboards, every BI tool and AI at the same time, so they can't drift apart.
 - **"Isn't this the migration team's job?"** Their scope is moving tables, and they're doing it. This sits on top and gives them a checklist for what a finished HR table looks like.
 - **"Who maintains it?"** Metric owners in HR, through reviewed pull requests; about a day a week of one engineer during the pilot.
 - **"Is it safe to point AI at HR data?"** Only through governed metrics with access rules and small-group suppression, which is exactly what proof 2 and 3 show.
