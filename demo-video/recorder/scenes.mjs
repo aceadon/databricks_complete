@@ -258,7 +258,7 @@ export const SCENES = {
       await askGenie(d, q);
       await d.hold(3);
       d.unfocus();
-      d.label('HR Analytics Assistant (semantic layer)');
+      d.label('HR Tech Analytics Assistant (semantic layer)');
       await d.goto(c.genieAssistantUrl);
       await askGenie(d, q);
       await d.hold(3);
@@ -272,7 +272,7 @@ export const SCENES = {
       await askGenie(d, q);
       await d.hold(2.5);
       d.unfocus();
-      d.label('HR Analytics Assistant (semantic layer)');
+      d.label('HR Tech Analytics Assistant (semantic layer)');
       await d.goto(c.genieAssistantUrl);
       await askGenie(d, q);
       await d.hold(3);

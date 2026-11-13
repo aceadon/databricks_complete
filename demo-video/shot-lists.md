@@ -33,7 +33,7 @@ Graphics open and close it; the middle is one SQL editor tab. Before recording, 
 
 ## T3: The 5-minute walk-through (about 5 minutes, narration 3:32)
 
-Three proofs, each opened by a SectionCard. Open these tabs first, in this order: (1) workforce_checks.sql as for the 2-minute video; (2) Genie: 'Tema raw (baseline)' and 'HR Analytics Assistant' (the Week 7 'People Analytics Assistant', renamed) in two tabs; (3) governance/02_hrbp_access_activity.sql with step 0 already run so hrbp_a, hrbp_b and manager_m are set; (4) the Workforce Overview dashboard as a fallback. Rebuild the governance model the same day (HRBP scope uses today's date).
+Three proofs, each opened by a SectionCard. Open these tabs first, in this order: (1) workforce_checks.sql as for the 2-minute video; (2) Genie: 'Tema raw (baseline)' and 'HR Tech Analytics Assistant' (the Week 7 'People Analytics Assistant', renamed) in two tabs; (3) governance/02_hrbp_access_activity.sql with step 0 already run so hrbp_a, hrbp_b and manager_m are set; (4) the Workforce Overview dashboard as a fallback. Rebuild the governance model the same day (HRBP scope uses today's date).
 
 | Scene | At | Length | Picture | What to do on screen | Narration |
 |---|---|---|---|---|---|
