@@ -5,7 +5,7 @@
   "genieRawUrl": "URL of the 'Tema raw (baseline)' Genie space",
   "genieAssistantUrl": "URL of the 'HR Tech Analytics Assistant' (renamed from 'People Analytics Assistant') Genie space",
   "hrbpNotebookUrl": "URL of hr_people_analytics/governance/02_hrbp_access_activity in your workspace",
-  "salaryQuestion": "Optional. Defaults to: What is the salary of Priya Patel in Applied AI & ML?",
+  "salaryQuestion": "What is the salary of Priya Patel in Applied AI & ML?",
 
   "browserChannel": "chrome",
   "runQueryKey": "Control+Enter",
