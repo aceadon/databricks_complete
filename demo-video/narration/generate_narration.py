@@ -114,15 +114,16 @@ def spell_numbers(text):
     return "".join(pt if pt.startswith("<") else re.sub(num, one, pt) for pt in parts)
 
 
-# How V4 should say abbreviations. It read "HR" as "H and R", so letters are spelled with dots.
-# Add a line here for any other word it gets wrong; scenes.json stays as written.
+# How V4 should say abbreviations. ElevenLabs' advice is to write acronyms out as words: V4 read both
+# "HR" and "H.R." as "H and R". Add a line here for any other word it gets wrong; scenes.json stays as written.
+# If a spelling still slips, Eleven v4 also takes IPA in slashes, e.g. "/eɪtʃ ɑɹ/".
 PRONOUNCE = {
-    "HRBPs": "H.R.B.P.s",
-    "HRBP": "H.R.B.P.",
-    "HR": "H.R.",
-    "KPIs": "K.P.I.s",
-    "VP": "V.P.",
-    "BI": "B.I.",
+    "HRBPs": "aitch-are-bee-pees",
+    "HRBP": "aitch-are-bee-pee",
+    "HR": "aitch-are",
+    "KPIs": "kay-pee-eyes",
+    "VP": "vee-pee",
+    "BI": "bee-eye",
 }
 
 
