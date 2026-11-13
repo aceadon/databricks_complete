@@ -238,7 +238,8 @@ async function findInNotebook(d, text, {last = false} = {}) {
 }
 
 async function runCell(d, c, text, {last = false, visible = true} = {}) {
-  const loc = await findInNotebook(d, text, {last});
+  // Safety net: if a cell still has to be searched for on camera, cut that scrolling from the video.
+  const loc = await d.waiting(() => findInNotebook(d, text, {last}), 'cut');
   if (!loc) {
     await d.manual(`Run the notebook cell that contains: ${text}`);
     await d.settle({min: 2, quiet: 3, max: 240});
