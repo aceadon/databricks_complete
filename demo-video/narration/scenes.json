@@ -146,8 +146,8 @@
           "id": "T3-06",
           "visual": "screen",
           "graphic": "SectionCard 2 before the clip",
-          "action": "Genie, two tabs side by side (or record each tab and place them side by side in the editor). Ask both: 'How many people did we have at the end of Q2 2025?' Wait for both answers.",
-          "text": "Second, AI gives confident, wrong answers. Here's the same question, asked of Genie on the raw tables, and of our Analytics Assistant on the semantic layer. The raw one adds up the months. The assistant answers fifty-eight thousand, eight hundred sixty-two."
+          "action": "Genie, two tabs side by side (or record each tab and place them side by side in the editor). Ask both: 'What was eNPS in each survey cycle?' Wait for both answers.",
+          "text": "Second, AI gives confident, wrong answers. Here's the same question, eNPS by survey cycle, asked of Genie on the raw tables, and of our Analytics Assistant on the semantic layer. The raw one averages a zero-to-ten score and calls it eNPS. The assistant uses the real definition, promoters minus detractors, and gets plus sixteen point six in the latest survey."
         },
         {
           "id": "T3-07",

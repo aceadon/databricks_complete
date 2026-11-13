@@ -365,14 +365,16 @@ export const SCENES = {
   'T3-06': {
     setup: (d, c) => d.goto(c.genieRawUrl),
     async run(d, c) {
-      const q = 'How many people did we have at the end of Q2 2025?';
+      // Benchmark Q10: raw averages the 0-10 score (about 7.8); the semantic layer gives real eNPS (+16.6 in 2026-H1).
+      // Headcount was dropped here: on Nov 13 the raw agent got 58,862 right in Agent mode.
+      const q = c.enpsQuestion ?? 'What was eNPS in each survey cycle?';
       d.label('Genie on the raw tables');
       await askGenie(d, q);
       await d.hold(4);
       d.unfocus();
       d.label('HR Tech Analytics Assistant (semantic layer)');
       await d.goto(c.genieAssistantUrl);
-      await askGenie(d, q, {expect: c.expect.semantic});
+      await askGenie(d, q, {expect: c.expect.enps ?? '16\\.6'});
       await d.hold(4);
     },
   },
