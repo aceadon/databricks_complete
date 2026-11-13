@@ -9,7 +9,8 @@ can be re-rendered to fit (npm run render:all in ../remotion).
 Needs only Python 3.9+ (no packages). Your API key is read from the
 ELEVENLABS_API_KEY environment variable and is never printed or written anywhere.
 
-  python generate_narration.py                       # uses your one cloned voice
+  python generate_narration.py                       # uses Demo Voice (DEFAULT_VOICE_ID below)
+  python generate_narration.py --force               # regenerate every clip, e.g. after changing voice
   python generate_narration.py --voice-name "Ashley"
   python generate_narration.py --only T1             # one video
   python generate_narration.py --only T2-04 --force  # redo one scene
@@ -28,6 +29,8 @@ from pathlib import Path
 API = "https://api.elevenlabs.io/v1"
 HERE = Path(__file__).resolve().parent
 AUDIO = HERE.parent / "audio"
+# Ashley's "Demo Voice" (set 2026-11-12). --voice-id or --voice-name override it.
+DEFAULT_VOICE_ID = "raCeU2yDu9AXhX4woLSo"
 MODEL = "eleven_multilingual_v2"  # supports <break time="0.4s" /> tags
 SETTINGS = {"stability": 0.5, "similarity_boost": 0.8, "style": 0.0, "use_speaker_boost": True, "speed": 1.0}
 
@@ -60,6 +63,8 @@ def voices():
 def pick_voice(args):
     if args.voice_id:
         return args.voice_id, args.voice_id
+    if not args.voice_name and DEFAULT_VOICE_ID:
+        return DEFAULT_VOICE_ID, f"Demo Voice ({DEFAULT_VOICE_ID})"
     vs = voices()
     if args.voice_name:
         m = [v for v in vs if v["name"].lower() == args.voice_name.lower()]
