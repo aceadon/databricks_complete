@@ -18,23 +18,38 @@ export type Capture = {
   duration: number;
   frames: {file: string; t: number}[];
   events: Ev[];
-  segments: {kind: 'action' | 'wait'; start: number; end: number}[];
+  segments: {kind: 'action' | 'wait' | 'cut'; start: number; end: number}[];
+};
+
+const MAX_WAIT_OUT = 3; // no single fast-forwarded wait lasts more than 3 s on screen
+const CUT_OUT = 0.04; // a hand-done step leaves just one frame
+
+/** Output length of one segment, given the speed-up k for waits. */
+const segOut = (s: Capture['segments'][number], k: number) => {
+  const len = s.end - s.start;
+  if (s.kind === 'action') return len;
+  if (s.kind === 'cut') return CUT_OUT;
+  return Math.min(len * k, MAX_WAIT_OUT);
 };
 
 /** How much to speed up the waiting parts so the scene fits `target` seconds. Never faster than 10x. */
 export const fitCapture = (cap: Capture, target: number) => {
   const A = cap.segments.filter((s) => s.kind === 'action').reduce((a, s) => a + s.end - s.start, 0);
   const W = cap.segments.filter((s) => s.kind === 'wait').reduce((a, s) => a + s.end - s.start, 0);
-  const k = W <= 0 || A + W <= target ? 1 : Math.min(1, Math.max((target - A) / W, 0.1));
-  return {k, length: A + W * k};
+  const C = cap.segments.filter((s) => s.kind === 'cut').length * CUT_OUT;
+  const k = W <= 0 || A + W + C <= target ? 1 : Math.min(1, Math.max((target - A - C) / W, 0.1));
+  return {k, length: cap.segments.reduce((a, s) => a + segOut(s, k), 0)};
 };
 
 /** Output seconds -> capture seconds, given the wait speed-up k. */
 const toCaptureTime = (cap: Capture, k: number, out: number) => {
   let o = 0;
   for (const s of cap.segments) {
-    const len = (s.end - s.start) * (s.kind === 'wait' ? k : 1);
-    if (out <= o + len) return {t: s.start + (out - o) / (s.kind === 'wait' ? k : 1), waiting: s.kind === 'wait'};
+    const len = segOut(s, k);
+    if (out <= o + len) {
+      const p = len > 0 ? (out - o) / len : 1;
+      return {t: s.start + p * (s.end - s.start), waiting: s.kind === 'wait'};
+    }
     o += len;
   }
   return {t: cap.duration, waiting: false};

@@ -89,13 +89,13 @@ export class Director {
     this.segStart = t;
   }
   waitTotal() {
-    return this.segments.filter((s) => s.kind === 'wait').reduce((a, s) => a + s.end - s.start, 0);
+    return this.segments.filter((s) => s.kind !== 'action').reduce((a, s) => a + s.end - s.start, 0);
   }
   /** Everything inside fn is "waiting" (loading, query running): Remotion fast-forwards it. */
-  async waiting(fn) {
+  async waiting(fn, kind = 'wait') {
     if (!this.recording) return fn();
     this.closeSegment();
-    this.segKind = 'wait';
+    this.segKind = kind;
     try {
       return await fn();
     } finally {
@@ -147,7 +147,7 @@ export class Director {
     await this.waiting(async () => {
       const rl = readline.createInterface({input: process.stdin, output: process.stdout});
       await new Promise((r) => rl.question('', () => (rl.close(), r())));
-    });
+    }, 'cut'); // hand-done steps are cut out of the video entirely
   }
 
   async box(target) {

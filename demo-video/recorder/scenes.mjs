@@ -119,8 +119,29 @@ async function askGenie(d, question) {
 }
 
 // ---------------- Notebook ----------------
+/** Notebooks only draw cells near the screen, so scroll through the notebook until the text appears. */
+async function findInNotebook(d, text, {last = false} = {}) {
+  const loc = () => (last ? d.page.getByText(text).last() : d.page.getByText(text).first());
+  const visible = async () => (await loc().isVisible().catch(() => false)) ? loc() : null;
+  await d.page.keyboard.press('Escape').catch(() => {}); // leave edit mode so the wheel scrolls the notebook
+  const at = {x: d.viewport.width * 0.55, y: d.viewport.height * 0.55};
+  await d.page.mouse.move(at.x, at.y);
+  let hit = await visible();
+  if (hit) return hit;
+  // From the top, then down in screen-sized steps (and from the bottom up, for `last`).
+  const dir = last ? 1 : -1;
+  for (let i = 0; i < 30; i++) await d.page.mouse.wheel(0, dir * 3000);
+  await d.page.waitForTimeout(600);
+  for (let i = 0; i < 80; i++) {
+    if ((hit = await visible())) return hit;
+    await d.page.mouse.wheel(0, -dir * 500);
+    await d.page.waitForTimeout(250);
+  }
+  return null;
+}
+
 async function runCell(d, c, text, {last = false, visible = true} = {}) {
-  const loc = await d.find([(p) => (last ? p.getByText(text).last() : p.getByText(text))], 15000);
+  const loc = await findInNotebook(d, text, {last});
   if (!loc) {
     await d.manual(`Run the notebook cell that contains: ${text}`);
     await d.settle({min: 2, quiet: 3, max: 240});
