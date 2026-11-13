@@ -79,6 +79,12 @@ if (browser) {
   });
   page = context.pages()[0] ?? (await context.newPage());
 }
+// The recorder pastes SQL into the editor, so it needs the clipboard.
+try {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], {origin: new URL(c.workspaceUrl).origin});
+} catch (e) {
+  console.warn(`Couldn't grant clipboard access (${String(e.message).split('\n')[0]}); SQL scenes may fail.`);
+}
 const d = new Director(page, {
   outRoot: opt('out') ?? join(HERE, '..', 'remotion', 'public', 'capture'),
   viewport,

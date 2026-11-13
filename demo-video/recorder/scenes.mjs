@@ -32,60 +32,47 @@ async function replaceSql(d, sql, {visible = true} = {}) {
     if (visible) await d.click(ed, {offset: {x: 40, y: 20}});
     else await ed.click({position: {x: 40, y: 20}});
   }
+  // Paste the query instead of typing it. Typing in the Databricks editor loses the line breaks
+  // ("headcountFROM ..."), whatever key is used; a paste keeps the text exactly as written.
   await d.page.keyboard.press('Control+A');
   await d.page.keyboard.press('Delete');
-  const lines = sql.split('\n');
-  if (visible) {
-    // Type line by line. After each line, make sure a new line really started: in the Databricks editor
-    // Enter can be swallowed, which fused "headcount" and "FROM" into one word.
-    for (let i = 0; i < lines.length; i++) {
-      await d.type(lines[i], {codeEditor: true});
-      if (i === lines.length - 1) break;
-      const before = await lineCount(d);
-      await d.page.keyboard.press('Escape');
-      await d.page.keyboard.insertText('\n');
-      await new Promise((r) => setTimeout(r, 200));
-      if ((await lineCount(d)) <= before) {
-        await d.page.keyboard.press('Shift+Enter');
-        await new Promise((r) => setTimeout(r, 200));
-        if ((await lineCount(d)) <= before) await d.page.keyboard.insertText(' '); // keep it valid on one line
-      }
-    }
-  } else await d.page.keyboard.insertText(sql);
-  // Check what the editor holds before anything runs. If it's wrong, put the query in as one line,
-  // which can't be mangled by line breaks.
+  await setClipboard(d, sql);
+  if (visible) d.event({type: 'typing', on: true});
+  await d.page.keyboard.press('Control+V');
+  if (visible) d.event({type: 'typing', on: false});
+  await new Promise((r) => setTimeout(r, 400));
+  // Read the editor back (select all + copy) and make sure it holds exactly this query.
   const norm = (t) => t.replace(/\s+/g, ' ').trim();
-  let got = await editorText(d);
-  if (got !== null && norm(got) !== norm(sql)) {
-    d.log(`  (the editor text came out wrong, fixing it: "${norm(got).slice(0, 90)}")`);
-    await d.page.keyboard.press('Control+A');
-    await d.page.keyboard.press('Delete');
-    await d.page.keyboard.insertText(lines.join(' '));
-    await new Promise((r) => setTimeout(r, 300));
-    got = await editorText(d);
-    if (got !== null && norm(got) !== norm(sql)) throw new Error(`The SQL editor holds the wrong text: "${norm(got).slice(0, 120)}"`);
-  }
+  const got = await editorTextViaCopy(d);
+  if (got !== null && norm(got) !== norm(sql)) throw new Error(`The SQL editor holds the wrong text: "${norm(got).slice(0, 120)}"`);
+  if (got === null) d.log('  (could not read the editor back to check the query; carrying on)');
 }
 
-async function lineCount(d) {
-  return d.page.evaluate(() => document.querySelectorAll('.monaco-editor .view-line, .cm-line').length).catch(() => 0);
+async function setClipboard(d, text) {
+  const ok = await d.page.evaluate((t) => navigator.clipboard.writeText(t).then(() => true, () => false), text).catch(() => false);
+  if (!ok) throw new Error('Could not use the clipboard to paste the query. Click into the Chrome window once and try again.');
 }
 
-/** The code editor's text, top to bottom, or null if it can't be read. */
-async function editorText(d) {
-  return d.page
-    .evaluate(() => {
-      const lines = [...document.querySelectorAll('.monaco-editor .view-line, .cm-line')];
-      if (!lines.length) return null;
-      lines.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
-      return lines.map((l) => l.textContent.replace(/\u00a0/g, ' ')).join('\n');
-    })
-    .catch(() => null);
+/** The editor's text, read by selecting all and copying. Leaves the cursor at the end. */
+async function editorTextViaCopy(d) {
+  await d.page.keyboard.press('Control+A');
+  await d.page.keyboard.press('Control+C');
+  await new Promise((r) => setTimeout(r, 150));
+  await d.page.keyboard.press('Control+End');
+  return d.page.evaluate(() => navigator.clipboard.readText().catch(() => null)).catch(() => null);
 }
 
 async function runQuery(d, c) {
   await d.press(c.runQueryKey);
-  await d.settle({min: 2, quiet: 2.5, max: 180});
+  // A stopped warehouse asks "Start compute resource?" first: accept it (the wait is sped up in the video).
+  await d.waiting(async () => {
+    const btn = await d.find([(p) => p.getByRole('dialog').getByRole('button', {name: /start,? attach and run|start and run|^start$|start compute/i})], 4000);
+    if (btn) {
+      d.log('  (the SQL warehouse was stopped; starting it)');
+      await btn.click();
+    }
+  });
+  await d.settle({min: 2, quiet: 2.5, max: 240});
   const err = await d.page.getByText(/PARSE_SYNTAX_ERROR|UNRESOLVED_COLUMN|TABLE_OR_VIEW_NOT_FOUND|\[[A-Z_]{6,}\]/).first().textContent({timeout: 500}).catch(() => null);
   if (err) throw new Error(`The query failed on screen: ${err.trim().slice(0, 120)}`);
 }
