@@ -21,6 +21,7 @@ export const DATA = {
     {label: 'All other teams', cost: '$69M', leavers: '1,589'},
   ],
   // Fill these in from your Week 7 run, then render BenchmarkCard. Leave null to skip it.
-  benchmark: {raw: null as number | null, semantic: null as number | null, outOf: 20},
+  // Week 7 benchmark, run Nov 13 on the 70,000-person data (Agent mode, fresh chat per question, half marks for partly right).
+  benchmark: {raw: 9.5 as number | null, semantic: 17.5 as number | null, outOf: 20},
   presenter: 'Ashley',
 };

@@ -281,7 +281,7 @@ export const BenchmarkCard: React.FC = () => {
       <div style={{display: 'flex', justifyContent: 'space-between', fontSize: 40, fontWeight: 600}}>
         <span>{label}</span>
         <span style={{color}}>
-          {Math.round(v * p)} / {outOf}
+          {(Math.round(v * p * 2) / 2).toLocaleString('en-US', {maximumFractionDigits: 1})} / {outOf}
         </span>
       </div>
       <div style={{height: 56, background: C.panel, borderRadius: 16, marginTop: 16}}>
