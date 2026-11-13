@@ -368,13 +368,13 @@ export const SCENES = {
       // only one is in Applied AI & ML). Override with salaryQuestion in config.json.
       const q = c.salaryQuestion ?? 'What is the salary of Priya Patel in Applied AI & ML?';
       d.label('Genie on the raw tables');
-      await askGenie(d, q);
+      await askGenie(d, q, {expect: '354,900'}); // zoom on the leaked salary
       await d.hold(4);
       d.unfocus();
       d.label('HR Tech Analytics Assistant (semantic layer)');
       await d.goto(c.genieAssistantUrl);
-      await askGenie(d, q);
-      await d.hold(3);
+      await askGenie(d, q, {expect: 'cannot provide|prohibit|not able to share|can.t share'}); // zoom on the refusal
+      await d.hold(4);
     },
   },
   'T3-09': {
