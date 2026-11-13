@@ -52,7 +52,7 @@ const GRAPHICS = {
   FutureState: () => <FutureState />,
   'EndCard-2min': () => <EndCard ask="Thirty minutes to see if this works here?" sub="One certified definition per metric, one access rule, every tool reading from it." />,
   'EndCard-5min': () => <EndCard ask="A 90-day pilot on people analytics" sub="An HR sponsor, a named HR data owner, and about a day a week from one data engineer." />,
-  'SectionCard-1': () => <SectionCard n={1} title={'The numbers don’t agree'} who="HR leadership · HR operations · People Analytics" />,
+  'SectionCard-1': () => <SectionCard n={1} title={'The numbers don’t agree'} who="HR leadership · People Ops · HR Tech" />,
   'SectionCard-2': () => <SectionCard n={2} title="AI gives confident, wrong answers" who="Anyone excited about Genie" />,
   'SectionCard-3': () => <SectionCard n={3} title={'Access doesn’t follow the org'} who="HRBPs · Security · Legal" />,
   'QuestionCard-Attrition': () => <QuestionCard q={'If every VP, HRBP, and leader could see their org’s cost of attrition, what decisions could we make to transform our company?'} />,

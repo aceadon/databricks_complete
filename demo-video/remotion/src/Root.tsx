@@ -28,7 +28,7 @@ export const Root: React.FC = () => {
       <Composition id="CostCallout-AI" component={CostCallout} durationInFrames={f('T3-04')} defaultProps={{withAI: true}} {...HD} />
       <Composition id="FutureState" component={FutureState} durationInFrames={Math.max(f('T2-07'), s(8))} {...HD} />
 
-      <Composition id="SectionCard-1" component={SectionCard} durationInFrames={s(3.5)} defaultProps={{n: 1, title: 'The numbers don’t agree', who: 'HR leadership · HR operations · People Analytics'}} {...HD} />
+      <Composition id="SectionCard-1" component={SectionCard} durationInFrames={s(3.5)} defaultProps={{n: 1, title: 'The numbers don’t agree', who: 'HR leadership · People Ops · HR Tech'}} {...HD} />
       <Composition id="SectionCard-2" component={SectionCard} durationInFrames={s(3.5)} defaultProps={{n: 2, title: 'AI gives confident, wrong answers', who: 'Anyone excited about Genie'}} {...HD} />
       <Composition id="SectionCard-3" component={SectionCard} durationInFrames={s(3.5)} defaultProps={{n: 3, title: 'Access doesn’t follow the org', who: 'HRBPs · Security · Legal'}} {...HD} />
       <Composition id="QuestionCard-Attrition" component={QuestionCard} durationInFrames={f('T3-05', 2)} defaultProps={{q: 'If every VP, HRBP, and leader could see their org’s cost of attrition, what decisions could we make to transform our company?'}} {...HD} />

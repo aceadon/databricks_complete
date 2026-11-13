@@ -362,7 +362,7 @@ export const EndCard: React.FC<{ask: string; sub: string}> = ({ask, sub}) => (
         <div style={{fontSize: 40, color: C.muted, marginTop: 34, maxWidth: 1400, lineHeight: 1.35}}>{sub}</div>
       </Rise>
       <Rise delay={26}>
-        <div style={{fontSize: 34, marginTop: 60, fontWeight: 600}}>{DATA.presenter} · People Analytics</div>
+        <div style={{fontSize: 34, marginTop: 60, fontWeight: 600}}>{DATA.presenter} · HR Tech, People Ops</div>
       </Rise>
     </AbsoluteFill>
     <Footer />

@@ -105,14 +105,14 @@
       "id": "T3",
       "title": "The 5-minute walk-through",
       "length_target": "about 5 minutes",
-      "notes": "Three proofs, each opened by a SectionCard. Open these tabs first, in this order: (1) workforce_checks.sql as for the 2-minute video; (2) Genie: 'Tema raw (baseline)' and 'People Analytics Assistant' in two tabs; (3) governance/02_hrbp_access_activity.sql with step 0 already run so hrbp_a, hrbp_b and manager_m are set; (4) the Workforce Overview dashboard as a fallback. Rebuild the governance model the same day (HRBP scope uses today's date).",
+      "notes": "Three proofs, each opened by a SectionCard. Open these tabs first, in this order: (1) workforce_checks.sql as for the 2-minute video; (2) Genie: 'Tema raw (baseline)' and 'HR Analytics Assistant' (the Week 7 'People Analytics Assistant', renamed) in two tabs; (3) governance/02_hrbp_access_activity.sql with step 0 already run so hrbp_a, hrbp_b and manager_m are set; (4) the Workforce Overview dashboard as a fallback. Rebuild the governance model the same day (HRBP scope uses today's date).",
       "scenes": [
         {
           "id": "T3-01",
           "visual": "graphic",
           "graphic": "TitleCard (5-minute variant), then GapIntro",
           "action": "None.",
-          "text": "We're rolling out Databricks, and Data Engineering is moving our HR tables there. Three things don't move with the tables. What our numbers mean. What AI is allowed to answer. And who's allowed to see sensitive people data. <break time=\"0.4s\" /> Today those live in individual queries, BI tool settings, and spreadsheets. So we manually reconcile numbers before leadership reviews, we're nervous about pointing AI at HR data, and sensitive data access could break at any transfer or reorg. To demonstrate how Databricks can address all of these, the team built a working demo, on a fictional seventy-thousand-person company called Tema. In the next four minutes, you'll learn three ways we're designing Databricks to serve the needs of People Analytics."
+          "text": "We're rolling out Databricks, and Data Engineering is moving our HR tables there. Three things don't move with the tables. What our numbers mean. What AI is allowed to answer. And who's allowed to see sensitive people data. <break time=\"0.4s\" /> Today those live in individual queries, BI tool settings, and spreadsheets. So we manually reconcile numbers before leadership reviews, we're nervous about pointing AI at HR data, and sensitive data access could break at any transfer or reorg. To demonstrate how Databricks can address all of these, the team built a working demo, on a fictional seventy-thousand-person company called Tema. In the next four minutes, you'll learn three ways we're designing Databricks to serve the needs of People Ops."
         },
         {
           "id": "T3-02",
@@ -133,7 +133,7 @@
           "visual": "graphic",
           "graphic": "CostCallout (with the AI team breakdown)",
           "action": "None.",
-          "text": "And because attrition now means precisely one thing, and is defined next to other metrics like time to fill and salary, we can evaluate the cost of regrettable attrition. In our example, Tema regrettably lost two thousand, seven hundred eighty-two employees in the last twelve months. That's about one hundred ninety million dollars a year to replace them, at half a salary each. The AI team alone, which grew about sixfold, accounts for five hundred three of them, at a cost of about sixty-seven million dollars."
+          "text": "And because attrition now means precisely one thing, and is defined next to other metrics like time to fill and salary, we can evaluate the cost of regrettable attrition. In our example, Tema lost two thousand, seven hundred eighty-two regretted leavers in the last twelve months. That's about one hundred ninety million dollars a year to replace them, at half a salary each. The AI team alone, which grew about sixfold, accounts for five hundred three of them, at a cost of about sixty-seven million dollars."
         },
         {
           "id": "T3-05",
