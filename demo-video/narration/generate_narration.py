@@ -114,6 +114,24 @@ def spell_numbers(text):
     return "".join(pt if pt.startswith("<") else re.sub(num, one, pt) for pt in parts)
 
 
+# How V4 should say abbreviations. It read "HR" as "H and R", so letters are spelled with dots.
+# Add a line here for any other word it gets wrong; scenes.json stays as written.
+PRONOUNCE = {
+    "HRBPs": "H.R.B.P.s",
+    "HRBP": "H.R.B.P.",
+    "HR": "H.R.",
+    "KPIs": "K.P.I.s",
+    "VP": "V.P.",
+    "BI": "B.I.",
+}
+
+
+def pronounce(text):
+    for word, say in PRONOUNCE.items():
+        text = re.sub(rf"\b{re.escape(word)}\b", say, text)
+    return text.replace("..", ".")
+
+
 def srt_time(t):
     ms = int(round(t * 1000))
     return f"{ms // 3600000:02}:{ms // 60000 % 60:02}:{ms // 1000 % 60:02},{ms % 1000:03}"
@@ -194,7 +212,7 @@ def main():
                 print(f"  {sc['id']}: exists, skipped (use --force to redo)")
                 continue
             plain = lambda t: re.sub(r"<[^>]+>", "", t)
-            text = spell_numbers(sc["text"])
+            text = pronounce(spell_numbers(sc["text"]))
             if not v2_style:  # newer models take [pause] audio tags instead of <break> tags
                 text = re.sub(r"<break[^>]*/>", "[pause]", text)
             body = {"text": text, "model_id": model, "voice_settings": SETTINGS}
