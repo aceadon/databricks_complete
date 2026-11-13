@@ -163,7 +163,31 @@ async function hideGeniePanel(d) {
   }, 'cut');
 }
 
-async function askGenie(d, question) {
+/** Wait until Genie has finished answering: no "Analyzing" / "Skip to a faster answer" / stop button for 3 s. */
+async function waitForGenieAnswer(d, maxSec = 240) {
+  const busy = () =>
+    d.page
+      .evaluate(() => {
+        const t = document.body.innerText;
+        if (/skip to a faster answer|analyzing the data|thinking…|thinking\.\.\.|generating|running query/i.test(t)) return true;
+        return [...document.querySelectorAll('button')].some((b) => /^stop/i.test((b.getAttribute('aria-label') || b.textContent || '').trim()));
+      })
+      .catch(() => false);
+  await d.waiting(async () => {
+    const end = Date.now() + maxSec * 1000;
+    let quietSince = null;
+    while (Date.now() < end) {
+      await new Promise((r) => setTimeout(r, 500));
+      if (await busy()) quietSince = null;
+      else if (quietSince === null) quietSince = Date.now();
+      else if (Date.now() - quietSince > 3000) return;
+    }
+    d.log('  (Genie was still working after the time limit; carrying on)');
+  });
+  await d.settle({min: 1, quiet: 3, max: 60});
+}
+
+async function askGenie(d, question, {expect} = {}) {
   await hideGeniePanel(d);
   const box = await d.find(genieInput, 20000);
   if (!box) {
@@ -175,7 +199,14 @@ async function askGenie(d, question) {
   await d.type(question);
   await d.hold(0.4);
   await d.press('Enter');
-  await d.settle({min: 6, quiet: 4, max: 180});
+  await waitForGenieAnswer(d);
+  if (expect) {
+    const hit = await d.waitForText(new RegExp(expect), {max: 20});
+    if (hit) {
+      await d.focus(hit, {zoom: 1.8, pad: 160});
+      return box;
+    }
+  }
   const b = await box.boundingBox();
   if (b) {
     const top = Math.max(60, b.y - 620);
@@ -322,12 +353,12 @@ export const SCENES = {
       const q = 'How many people did we have at the end of Q2 2025?';
       d.label('Genie on the raw tables');
       await askGenie(d, q);
-      await d.hold(3);
+      await d.hold(4);
       d.unfocus();
       d.label('HR Tech Analytics Assistant (semantic layer)');
       await d.goto(c.genieAssistantUrl);
-      await askGenie(d, q);
-      await d.hold(3);
+      await askGenie(d, q, {expect: c.expect.semantic});
+      await d.hold(4);
     },
   },
   'T3-07': {
@@ -336,7 +367,7 @@ export const SCENES = {
       const q = `What's ${c.salaryEmployee}'s salary?`;
       d.label('Genie on the raw tables');
       await askGenie(d, q);
-      await d.hold(2.5);
+      await d.hold(4);
       d.unfocus();
       d.label('HR Tech Analytics Assistant (semantic layer)');
       await d.goto(c.genieAssistantUrl);
