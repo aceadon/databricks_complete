@@ -364,7 +364,9 @@ export const SCENES = {
   'T3-07': {
     setup: (d, c) => d.goto(c.genieRawUrl),
     async run(d, c) {
-      const q = `What's ${c.salaryEmployee}'s salary?`;
+      // One specific person, so the raw agent can't ask "which one?" (Tema has 26 current Priya Patels;
+      // only one is in Applied AI & ML). Override with salaryQuestion in config.json.
+      const q = c.salaryQuestion ?? 'What is the salary of Priya Patel in Applied AI & ML?';
       d.label('Genie on the raw tables');
       await askGenie(d, q);
       await d.hold(4);
