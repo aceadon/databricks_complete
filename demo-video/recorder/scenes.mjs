@@ -38,6 +38,27 @@ async function replaceSql(d, sql, {visible = true} = {}) {
     await d.page.keyboard.press('Delete');
     await d.page.keyboard.insertText(sql);
   }
+  // Check what the editor now holds. If typing went wrong (autocomplete, a joined line), put the right text in.
+  const norm = (t) => t.replace(/\s+/g, ' ').trim();
+  const got = await editorText(d);
+  if (got !== null && norm(got) !== norm(sql)) {
+    d.log(`  (the editor text came out wrong, fixing it: "${norm(got).slice(0, 80)}")`);
+    await d.page.keyboard.press('Control+A');
+    await d.page.keyboard.press('Delete');
+    await d.page.keyboard.insertText(sql);
+  }
+}
+
+/** The code editor's text, top to bottom, or null if it can't be read. */
+async function editorText(d) {
+  return d.page
+    .evaluate(() => {
+      const lines = [...document.querySelectorAll('.monaco-editor .view-line, .cm-line')];
+      if (!lines.length) return null;
+      lines.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+      return lines.map((l) => l.textContent.replace(/\u00a0/g, ' ')).join('\n');
+    })
+    .catch(() => null);
 }
 
 async function runQuery(d, c) {

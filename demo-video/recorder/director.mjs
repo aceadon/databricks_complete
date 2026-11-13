@@ -193,8 +193,14 @@ export class Director {
     for (let i = 0; i < lines.length; i++) {
       await this.page.keyboard.type(lines[i], {delay: this.typingDelayMs});
       if (i < lines.length - 1) {
-        if (codeEditor) await this.page.keyboard.press('Escape');
-        await this.page.keyboard.press('Enter');
+        if (codeEditor) {
+          // Close autocomplete, then add the line break as text: pressing Enter can accept a suggestion
+          // and swallow the break (that is how "headcount" and "FROM" ended up joined).
+          await sleep(150);
+          await this.page.keyboard.press('Escape');
+          await sleep(100);
+          await this.page.keyboard.insertText('\n');
+        } else await this.page.keyboard.press('Enter');
       }
     }
     if (codeEditor) await this.page.keyboard.press('Escape');
