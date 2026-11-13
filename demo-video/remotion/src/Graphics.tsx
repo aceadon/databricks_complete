@@ -384,7 +384,8 @@ const Col: React.FC<{title: string; color: string; items: string[]; delay: numbe
   </div>
 );
 
-export const GapSummary: React.FC = () => (
+// cue: frame where the narration reaches "The future state"; the right column comes in on it.
+export const GapSummary: React.FC<{cue?: number}> = ({cue = 140}) => (
   <Bg>
     <SceneOut>
       <AbsoluteFill style={pad}>
@@ -396,13 +397,13 @@ export const GapSummary: React.FC = () => (
             title="Today"
             color={C.accent}
             delay={10}
-            items={['Tables arrive in Databricks', 'Definitions live in people’s heads', 'Access lives in a spreadsheet', 'AI is off limits, or not trusted']}
+            items={['Our data warehouse is moving to Databricks', 'Definitions live in people’s heads', 'Access lives in a spreadsheet', 'AI is off limits, or struggles to earn trust']}
           />
           <Col
             title="Future state"
             color={C.good}
-            delay={130}
-            items={['Every HR number certified once, the same everywhere', 'Sensitive data governed by one auditable rule', 'Definitions change only by reviewed pull request', 'An AI assistant whose HR answers the business can use']}
+            delay={Math.max(20, cue - 10)}
+            items={['Every HR number certified once, the same everywhere', 'Sensitive data governed by one auditable rule', 'Definitions change only through a reviewed diff', 'An AI assistant with consistent, usable HR answers']}
           />
         </div>
       </AbsoluteFill>

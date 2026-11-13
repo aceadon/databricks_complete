@@ -59,14 +59,14 @@ const GRAPHICS = {
   'Statement-AI': () => <QuestionCard statement q="Same AI, same data. AI is only as good as the definitions under it." />,
   BenchmarkCard: () => <BenchmarkCard />,
   AccessRule: () => <AccessRule />,
-  GapSummary: () => <GapSummary />,
+  GapSummary: ({cue}: GProps) => <GapSummary cue={cue} />,
 };
 
 type Block = {from: number; len: number; part: Part; sceneId: string; cap?: Capture | null; k?: number; cue?: number};
 type GProps = {cue?: number};
 
 // Graphics that animate on a spoken phrase: the scene and the words that trigger it.
-const CUES: Record<string, RegExp> = {'T2-06': /number can be|evaluated by/i};
+const CUES: Record<string, RegExp> = {'T2-06': /number can be|evaluated by/i, 'T3-13': /future state/i};
 
 /** Frame (from the start of the scene) where `re` is first spoken, from the clip's captions; else a guess from the text. */
 const cueFrame = async (sceneId: string, re: RegExp, text: string): Promise<number> => {

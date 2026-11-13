@@ -196,7 +196,7 @@
           "visual": "graphic",
           "graphic": "GapSummary",
           "action": "None.",
-          "text": "So here's the gap. Today, tables arrive in Databricks, definitions live in people's heads, access lives in a spreadsheet, and AI is off limits or struggles to earn users' trust. <break time=\"0.4s\" /> The future state: every HR number certified once, and the same everywhere. Sensitive data governed by one auditable rule. Definitions changed only by reviewed pull request. And an AI assistant that consistently returns HR data that the business can actually use."
+          "text": "So here's the gap. Today, our data warehouse is being migrated to Databricks, definitions live in people's heads, access lives in a spreadsheet, and AI is off limits or struggles to earn users' trust. <break time=\"0.4s\" /> The future state: every HR number certified once, and the same everywhere. Sensitive data governed by one auditable rule. Definitions changed only by reviewed diff. And an AI assistant that consistently returns HR data that the business can actually use."
         }
       ]
     }
