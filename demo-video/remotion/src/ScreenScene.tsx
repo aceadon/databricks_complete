@@ -107,15 +107,20 @@ export const ScreenScene: React.FC<{cap: Capture | null; k: number; sceneId: str
   const sc = cap.scale;
   let cx = W / 2;
   let cy = H / 2;
+  let lastActive = 0; // when the pointer last moved or clicked (capture seconds)
   for (const e of cap.events) {
     if (e.t > t) break;
     if (e.type === 'cursor') [cx, cy] = [e.x * sc, e.y * sc];
+    if (e.type === 'click') lastActive = Math.max(lastActive, e.t + 0.3);
     if (e.type === 'move') {
+      lastActive = Math.max(lastActive, e.t + e.dur);
       const q = ease(Math.min(1, (t - e.t) / Math.max(e.dur, 0.01)));
       cx = (e.x0 + (e.x1 - e.x0) * q) * sc;
       cy = (e.y0 + (e.y1 - e.y0) * q) * sc;
     }
   }
+  // A parked pointer fades out after a second so it never sits on top of the query or the result.
+  const cursorOpacity = interpolate(t - lastActive, [1, 1.4], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const clicks = cap.events.filter((e): e is Extract<Ev, {type: 'click'}> => e.type === 'click' && t - e.t >= 0 && t - e.t < 0.5);
   const label = [...cap.events].reverse().find((e): e is Extract<Ev, {type: 'label'}> => e.type === 'label' && e.t <= t);
 
@@ -150,7 +155,7 @@ export const ScreenScene: React.FC<{cap: Capture | null; k: number; sceneId: str
             />
           );
         })}
-        <Cursor x={cx} y={cy} />
+        {cursorOpacity > 0 && <div style={{opacity: cursorOpacity}}><Cursor x={cx} y={cy} /></div>}
       </div>
       {label && (
         <div
