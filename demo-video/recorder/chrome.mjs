@@ -33,7 +33,31 @@ const args = [
   '--disable-background-timer-throttling',
   cfg.workspaceUrl ?? 'about:blank',
 ];
+// Is a Chrome with the debugging port already up? Then just reuse it.
+const probe = async () => {
+  try {
+    const r = await fetch(`http://127.0.0.1:${port}/json/version`, {signal: AbortSignal.timeout(1500)});
+    return r.ok;
+  } catch {
+    return false;
+  }
+};
+if (await probe()) {
+  console.log(`Your recording Chrome is already running on port ${port}. Leave it open and run: npm run warmup, then npm run record`);
+  process.exit(0);
+}
 spawn(chrome, args, {detached: true, stdio: 'ignore'}).unref();
-console.log(`Chrome started with the recording profile (port ${port}).`);
-console.log('First time only: log in to Databricks in that window (Google sign-in works). Leave it open.');
-console.log('Then: npm run warmup, npm run record');
+let up = false;
+for (let i = 0; i < 20 && !up; i++) {
+  await new Promise((r) => setTimeout(r, 750));
+  up = await probe();
+}
+if (!up) {
+  console.error(`Chrome opened, but its debugging port ${port} isn't answering, so the recorder can't attach.`);
+  console.error('This usually means a window from the recording profile was already open without the port.');
+  console.error('Close every Chrome window that uses the recording profile (or run: taskkill /IM chrome.exe /F , which closes all Chrome), then run npm run chrome again.');
+  process.exit(1);
+}
+console.log(`Chrome started with the recording profile, and port ${port} is answering.`);
+console.log('If the window shows your Databricks workspace, you are logged in. If not, log in there (Google sign-in works). Leave it open.');
+console.log('Then, in this window: npm run warmup, then npm run record');

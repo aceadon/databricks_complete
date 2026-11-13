@@ -48,10 +48,18 @@ let browser = null;
 let context;
 let page;
 if (!flag('launch')) {
-  try {
-    browser = await chromium.connectOverCDP(cdpUrl, {timeout: 5000});
-  } catch {
-    console.log('No Chrome from `npm run chrome` found; launching one instead (Google sign-in may be blocked there).');
+  for (let i = 0; i < 3 && !browser; i++) {
+    try {
+      browser = await chromium.connectOverCDP(cdpUrl, {timeout: 10000});
+    } catch (e) {
+      if (i === 2) {
+        console.error(`Couldn't attach to your recording Chrome on ${cdpUrl} (${String(e.message).split('\n')[0]}).`);
+        console.error('Run `npm run chrome` first and leave that window open; it tells you whether the port is answering.');
+        console.error('(To use a separate automated Chrome instead, add --launch. Google sign-in is usually blocked there.)');
+        process.exit(1);
+      }
+      await new Promise((r) => setTimeout(r, 1500));
+    }
   }
 }
 if (browser) {
