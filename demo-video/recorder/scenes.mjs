@@ -33,20 +33,42 @@ async function replaceSql(d, sql, {visible = true} = {}) {
     else await ed.click({position: {x: 40, y: 20}});
   }
   await d.page.keyboard.press('Control+A');
-  if (visible) await d.type(sql, {codeEditor: true});
-  else {
-    await d.page.keyboard.press('Delete');
-    await d.page.keyboard.insertText(sql);
-  }
-  // Check what the editor now holds. If typing went wrong (autocomplete, a joined line), put the right text in.
+  await d.page.keyboard.press('Delete');
+  const lines = sql.split('\n');
+  if (visible) {
+    // Type line by line. After each line, make sure a new line really started: in the Databricks editor
+    // Enter can be swallowed, which fused "headcount" and "FROM" into one word.
+    for (let i = 0; i < lines.length; i++) {
+      await d.type(lines[i], {codeEditor: true});
+      if (i === lines.length - 1) break;
+      const before = await lineCount(d);
+      await d.page.keyboard.press('Escape');
+      await d.page.keyboard.insertText('\n');
+      await new Promise((r) => setTimeout(r, 200));
+      if ((await lineCount(d)) <= before) {
+        await d.page.keyboard.press('Shift+Enter');
+        await new Promise((r) => setTimeout(r, 200));
+        if ((await lineCount(d)) <= before) await d.page.keyboard.insertText(' '); // keep it valid on one line
+      }
+    }
+  } else await d.page.keyboard.insertText(sql);
+  // Check what the editor holds before anything runs. If it's wrong, put the query in as one line,
+  // which can't be mangled by line breaks.
   const norm = (t) => t.replace(/\s+/g, ' ').trim();
-  const got = await editorText(d);
+  let got = await editorText(d);
   if (got !== null && norm(got) !== norm(sql)) {
-    d.log(`  (the editor text came out wrong, fixing it: "${norm(got).slice(0, 80)}")`);
+    d.log(`  (the editor text came out wrong, fixing it: "${norm(got).slice(0, 90)}")`);
     await d.page.keyboard.press('Control+A');
     await d.page.keyboard.press('Delete');
-    await d.page.keyboard.insertText(sql);
+    await d.page.keyboard.insertText(lines.join(' '));
+    await new Promise((r) => setTimeout(r, 300));
+    got = await editorText(d);
+    if (got !== null && norm(got) !== norm(sql)) throw new Error(`The SQL editor holds the wrong text: "${norm(got).slice(0, 120)}"`);
   }
+}
+
+async function lineCount(d) {
+  return d.page.evaluate(() => document.querySelectorAll('.monaco-editor .view-line, .cm-line').length).catch(() => 0);
 }
 
 /** The code editor's text, top to bottom, or null if it can't be read. */
@@ -64,12 +86,15 @@ async function editorText(d) {
 async function runQuery(d, c) {
   await d.press(c.runQueryKey);
   await d.settle({min: 2, quiet: 2.5, max: 180});
+  const err = await d.page.getByText(/PARSE_SYNTAX_ERROR|UNRESOLVED_COLUMN|TABLE_OR_VIEW_NOT_FOUND|\[[A-Z_]{6,}\]/).first().textContent({timeout: 500}).catch(() => null);
+  if (err) throw new Error(`The query failed on screen: ${err.trim().slice(0, 120)}`);
 }
 
+/** Zoom onto the expected number. If it isn't on screen, the scene is wrong: fail it so it gets re-recorded. */
 async function focusNumber(d, pattern) {
   const hit = await d.waitForText(new RegExp(pattern), {max: 30});
-  if (hit) await d.focus(hit, {zoom: 2.2, pad: 140});
-  else await d.focus({x: 0, y: d.viewport.height * 0.5, width: d.viewport.width, height: d.viewport.height * 0.5}, {zoom: 1.3, pad: 0});
+  if (!hit) throw new Error(`Expected ${pattern} on screen, but it never appeared.`);
+  await d.focus(hit, {zoom: 2.2, pad: 140});
 }
 
 /** Rectangle of a piece of text inside the code editor (for drag-selecting it). */
