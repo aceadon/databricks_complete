@@ -55,7 +55,7 @@
           "visual": "graphic",
           "graphic": "TitleCard (2-minute variant), then GapIntro",
           "action": "None.",
-          "text": "Our Databricks rollout is moving HR's tables across. What it doesn't move is the definitions. What counts as headcount? What counts as attrition? Who's allowed to see salary? Today, each of those lives in somebody's query, dashboard, or spreadsheet. <break time=\"0.4s\" /> Let's look at an example of what I mean, and how Databricks can solve this, in about a minute. This is Tema, a fictional tech company of about seventy thousand people."
+          "text": "Our Databricks rollout is moving HR's tables across. What it doesn't move is the definitions. What counts as headcount? What counts as attrition? Who's allowed to see salary? Today, each one lives in somebody's query, dashboard, or spreadsheet. <break time=\"0.4s\" /> Let's look at an example of what I mean, and how Databricks can solve this, in about a minute. This is Tema, a fictional tech company of about seventy thousand people."
         },
         {
           "id": "T2-02",
