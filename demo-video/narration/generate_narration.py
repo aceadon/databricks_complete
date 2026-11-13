@@ -16,7 +16,7 @@ ELEVENLABS_API_KEY environment variable and is never printed or written anywhere
   python generate_narration.py --only T2-04 --force  # redo one scene
   python generate_narration.py --list-voices
   python generate_narration.py --voice-info          # which models your voice is tuned for
-  python generate_narration.py --model eleven_v4 --only T1-02 --force   # try Eleven v4 on one line
+  python generate_narration.py --model eleven_multilingual_v2 --only T1-02 --force   # one line on the older v2 model
 """
 import argparse
 import base64
@@ -33,7 +33,7 @@ HERE = Path(__file__).resolve().parent
 AUDIO = HERE.parent / "audio"
 # Ashley's "demo-voice-remix1" (set 2026-11-13). --voice-id or --voice-name override it.
 DEFAULT_VOICE_ID = "qZSejYSnvHeHshc7ymtE"
-MODEL = "eleven_multilingual_v2"  # supports <break time="0.4s" /> tags. --model eleven_v4 tries Eleven v4.
+MODEL = "eleven_v4"  # Ashley chose Eleven v4 (2026-11-13). <break> tags become [pause]. --model eleven_multilingual_v2 for the old model.
 SETTINGS = {"stability": 0.5, "similarity_boost": 0.8, "style": 0.0, "use_speaker_boost": True, "speed": 1.0}
 
 
@@ -159,7 +159,7 @@ def main():
     p.add_argument("--force", action="store_true", help="regenerate clips that already exist")
     p.add_argument("--list-voices", action="store_true")
     p.add_argument("--voice-info", action="store_true", help="show the voice's type and the models it is tuned for")
-    p.add_argument("--model", default=MODEL, help=f"ElevenLabs model id (default {MODEL}; try eleven_v4)")
+    p.add_argument("--model", default=MODEL, help=f"ElevenLabs model id (default {MODEL})")
     args = p.parse_args()
 
     if args.list_voices:
