@@ -211,10 +211,12 @@ def main():
             if mp3.exists() and not args.force:
                 print(f"  {sc['id']}: exists, skipped (use --force to redo)")
                 continue
-            plain = lambda t: re.sub(r"<[^>]+>", "", t)
+            plain = lambda t: re.sub(r"<[^>]+>|\*", "", t)
             text = pronounce(spell_numbers(sc["text"]))
             if not v2_style:  # newer models take [pause] audio tags instead of <break> tags
                 text = re.sub(r"<break[^>]*/>", "[pause]", text)
+            # *word* marks emphasis in scenes.json: V4 stresses words in capitals; v2 just gets the word.
+            text = re.sub(r"\*([^*]+)\*", lambda m: m.group(1) if v2_style else m.group(1).upper(), text)
             body = {"text": text, "model_id": model, "voice_settings": SETTINGS}
             # Neighbouring lines keep intonation consistent across separate clips (v2-style models).
             if v2_style and i > 0:

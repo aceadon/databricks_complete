@@ -90,7 +90,7 @@
           "visual": "graphic",
           "graphic": "CostCallout (Tema-wide only)",
           "action": "None.",
-          "text": "And headcount is the easy one. Attrition is where it costs money. Once Tema had one definition of attrition, it could finally see that regretted leavers cost about one hundred ninety million dollars a year."
+          "text": "And because attrition now means precisely one thing, and is defined next to other metrics like time to fill and salary, we can evaluate the cost of regrettable attrition. In our example, regrettable attrition cost Tema about one hundred ninety million dollars a year. The number can be evaluated by org, department, or leader <break time=\"0.4s\" /> *consistently*."
         },
         {
           "id": "T2-07",
