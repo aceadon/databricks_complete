@@ -36,7 +36,7 @@ SEMANTIC_SCHEMA = "tema_hr_semantic"
 SEMANTIC_SOURCES = ["workforce_metrics", "retention_metrics", "talent_acquisition_metrics", "experience_metrics",
                     "pay_by_level_safe", "business_metrics"]
 RAW_TITLE = "Tema raw (baseline)"
-ASSISTANT_TITLE = "People Analytics Assistant"
+ASSISTANT_TITLE = "HR Tech Analytics Assistant"  # renamed from the Week 7 "People Analytics Assistant"
 TEST_QUESTION = "How many people did we have at the end of Q2 2025?"
 
 
