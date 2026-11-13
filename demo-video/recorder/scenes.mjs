@@ -252,6 +252,20 @@ async function runCell(d, c, text, {last = false, visible = true} = {}) {
   return loc;
 }
 
+/**
+ * Before recording: find a cell and park it near the top of the screen, so the recorded scene
+ * starts on the right cell instead of scrolling the notebook on camera.
+ */
+async function positionCell(d, text, {last = false, top = 110} = {}) {
+  const loc = await findInNotebook(d, text, {last});
+  if (!loc) return null;
+  await loc.evaluate((el) => el.scrollIntoView({block: 'start'})).catch(() => {});
+  await d.page.waitForTimeout(300);
+  await d.page.mouse.wheel(0, -top);
+  await d.page.waitForTimeout(600);
+  return loc;
+}
+
 /** Focus the output under the cell we just ran. */
 async function focusOutputBelow(d, loc, height = 430) {
   const b = loc && (await loc.boundingBox().catch(() => null));
@@ -378,31 +392,44 @@ export const SCENES = {
     },
   },
   'T3-09': {
-    setup: notebookSetup,
+    // Switching to the HRBP persona happens off camera; the scene opens on the query that shows the result.
+    async setup(d, c) {
+      await notebookSetup(d, c);
+      await runCell(d, c, "INSERT INTO access_personas VALUES (current_user(), 'hrbp', hrbp_a)", {visible: false});
+      await positionCell(d, 'Where can hrbp_a see sensitive data?');
+    },
     async run(d, c) {
       d.label('Acting as an HR business partner');
-      await runCell(d, c, "INSERT INTO access_personas VALUES (current_user(), 'hrbp', hrbp_a)");
-      await d.hold(1);
+      await d.hold(0.8);
       const cell = await runCell(d, c, 'Where can hrbp_a see sensitive data?');
       await focusOutputBelow(d, cell);
       await d.hold(4);
     },
   },
   'T3-10': {
-    setup: notebookSetup,
+    async setup(d, c) {
+      await notebookSetup(d, c);
+      await positionCell(d, "INSERT INTO access_personas VALUES (current_user(), 'manager', manager_m)");
+    },
     async run(d, c) {
       d.label('Acting as a people manager');
+      await d.hold(0.8);
       const cell = await runCell(d, c, "INSERT INTO access_personas VALUES (current_user(), 'manager', manager_m)");
       await focusOutputBelow(d, cell);
       await d.hold(3.5);
     },
   },
   'T3-11': {
-    setup: notebookSetup,
+    // Park the cell's last lines (end the assignment, rebuild, check) at the top, so its output is on screen.
+    async setup(d, c) {
+      await notebookSetup(d, c);
+      await positionCell(d, 'SET effective_to = date_sub(current_date(), 1)');
+    },
     async run(d, c) {
       d.label('An HRBP assignment ends');
-      const cell = await runCell(d, c, 'DECLARE OR REPLACE VARIABLE ended_assignment');
-      await focusOutputBelow(d, cell, 300);
+      await d.hold(0.8);
+      const cell = await runCell(d, c, 'SET effective_to = date_sub(current_date(), 1)');
+      await focusOutputBelow(d, cell, 400);
       await d.hold(3.5);
     },
     // Always put the assignment back and return to HR admin, whatever happened above.
