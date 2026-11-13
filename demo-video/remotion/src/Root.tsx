@@ -24,7 +24,7 @@ export const Root: React.FC = () => {
       <Composition id="TitleCard-5min" component={TitleCard} durationInFrames={s(4)} defaultProps={{tier: 'The 5-minute walk-through'}} {...HD} />
       <Composition id="GapIntro" component={GapIntro} durationInFrames={Math.max(f('T3-01') - s(4), s(10))} {...HD} />
       <Composition id="NumberReveal" component={NumberReveal} durationInFrames={Math.max(f('T2-05'), s(7))} {...HD} />
-      <Composition id="CostCallout-Tema" component={CostCallout} durationInFrames={f('T2-06')} defaultProps={{withAI: false}} {...HD} />
+      <Composition id="CostCallout-Tema" component={CostCallout} durationInFrames={Math.max(f('T2-06'), 240)} defaultProps={{withAI: false, cue: 60}} {...HD} />
       <Composition id="CostCallout-AI" component={CostCallout} durationInFrames={f('T3-04')} defaultProps={{withAI: true}} {...HD} />
       <Composition id="FutureState" component={FutureState} durationInFrames={Math.max(f('T2-07'), s(8))} {...HD} />
 

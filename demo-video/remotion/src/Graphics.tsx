@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 import {C} from './theme';
 import {DATA} from './data';
 import {Bg, CountUp, Footer, Kicker, Pill, Rise, SceneOut, TableIcon, useIn} from './ui';
@@ -114,10 +114,14 @@ export const NumberReveal: React.FC = () => {
   );
 };
 
-export const CostCallout: React.FC<{withAI: boolean}> = ({withAI}) => (
+export const CostCallout: React.FC<{withAI: boolean; cue?: number}> = ({withAI, cue}) => {
+  const frame = useCurrentFrame();
+  // When the split starts, the headline shrinks toward the left to make room for the column of parts.
+  const shrink = !withAI && cue !== undefined ? interpolate(frame, [cue - 12, cue + 6], [1, 0.8], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)}) : 1;
+  return (
   <Bg>
     <SceneOut>
-      <AbsoluteFill style={{...pad, justifyContent: 'center'}}>
+      <AbsoluteFill style={{...pad, justifyContent: 'center', transform: `scale(${shrink})`, transformOrigin: '140px 540px'}}>
         <Rise>
           <Kicker>Once attrition means one thing, you can cost it</Kicker>
         </Rise>
@@ -140,10 +144,92 @@ export const CostCallout: React.FC<{withAI: boolean}> = ({withAI}) => (
           )}
         </div>
       </AbsoluteFill>
+      {!withAI && cue !== undefined && <CostSplits start={cue} />}
       <Footer />
     </SceneOut>
   </Bg>
-);
+  );
+};
+
+/** The $190M splitting into groups: curved lines grow from the number to a column of parts that add up to it. */
+const CostSplits: React.FC<{start: number}> = ({start}) => {
+  const frame = useCurrentFrame();
+  const rows = DATA.costSplits;
+  // The big number sits on the left of the 1920x1080 frame; the lines leave from just right of it.
+  const from = {x: 862, y: 512};
+  const colX = 1190;
+  const rowH = 128;
+  const top = 540 - ((rows.length - 1) * rowH) / 2 - 40;
+  const STAGGER = 9;
+  const DRAW = 16;
+  const sumAt = start + rows.length * STAGGER + DRAW + 6;
+  const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
+  return (
+    <AbsoluteFill>
+      <svg width={1920} height={1080} style={{position: 'absolute', inset: 0}}>
+        {rows.map((r, i) => {
+          const y = top + i * rowH;
+          const t0 = start + i * STAGGER;
+          const p = interpolate(frame, [t0, t0 + DRAW], [0, 1], {...clamp, easing: Easing.inOut(Easing.cubic)});
+          const d = `M ${from.x} ${from.y} C ${from.x + 170} ${from.y}, ${colX - 190} ${y}, ${colX - 24} ${y}`;
+          return (
+            <g key={r.label} opacity={p > 0 ? 1 : 0}>
+              <path d={d} fill="none" stroke={C.amber} strokeOpacity={0.75} strokeWidth={4} strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} />
+              <circle cx={colX - 24} cy={y} r={7 * p} fill={C.amber} />
+            </g>
+          );
+        })}
+        <circle cx={from.x} cy={from.y} r={9 * interpolate(frame, [start, start + 6], [0, 1], clamp)} fill={C.amber} />
+      </svg>
+      {rows.map((r, i) => {
+        const y = top + i * rowH;
+        const t = start + i * STAGGER + DRAW - 4;
+        const o = interpolate(frame, [t, t + 10], [0, 1], clamp);
+        return (
+          <div
+            key={r.label}
+            style={{
+              position: 'absolute',
+              left: colX,
+              top: y - 52,
+              width: 600,
+              height: 104,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              opacity: o,
+              transform: `translateX(${(1 - o) * 24}px)`,
+              background: C.panel,
+              borderRadius: 18,
+              padding: '0 32px',
+              boxSizing: 'border-box',
+              borderLeft: `6px solid ${C.amber}`,
+            }}
+          >
+            <div>
+              <div style={{fontSize: 36, fontWeight: 700}}>{r.label}</div>
+              <div style={{fontSize: 24, color: C.muted, marginTop: 4}}>{r.leavers} regretted leavers</div>
+            </div>
+            <div style={{fontSize: 66, fontWeight: 800, color: C.amber}}>{r.cost}</div>
+          </div>
+        );
+      })}
+      {(() => {
+        const y = top + (rows.length - 1) * rowH + 52 + 22;
+        const o = interpolate(frame, [sumAt, sumAt + 10], [0, 1], clamp);
+        return (
+          <div style={{position: 'absolute', left: colX, top: y, width: 600, opacity: o}}>
+            <div style={{height: 3, background: C.amber, opacity: 0.6, transform: `scaleX(${o})`, transformOrigin: 'right'}} />
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 10, padding: '0 32px 0 38px'}}>
+              <div style={{fontSize: 26, color: C.muted}}>Adds up to</div>
+              <div style={{fontSize: 46, fontWeight: 800, color: C.amber}}>= {DATA.regrettedCost}</div>
+            </div>
+          </div>
+        );
+      })()}
+    </AbsoluteFill>
+  );
+};
 
 export const SectionCard: React.FC<{n: number; title: string; who: string}> = ({n, title, who}) => {
   const p = useIn(0);

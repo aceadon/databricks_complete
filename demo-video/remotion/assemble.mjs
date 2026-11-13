@@ -8,7 +8,7 @@ import {cpSync, existsSync, mkdirSync, readdirSync} from 'node:fs';
 
 mkdirSync('public/audio', {recursive: true});
 if (existsSync('../audio')) {
-  for (const f of readdirSync('../audio').filter((f) => f.endsWith('.mp3'))) cpSync(`../audio/${f}`, `public/audio/${f}`);
+  for (const f of readdirSync('../audio').filter((f) => f.endsWith('.mp3') || f.endsWith('.srt'))) cpSync(`../audio/${f}`, `public/audio/${f}`);
 } else console.warn('No ../audio folder yet: the videos will be silent. Run narration/generate_narration.py first.');
 
 const videos = process.argv.slice(2).length ? process.argv.slice(2) : ['T1', 'T2', 'T3'];

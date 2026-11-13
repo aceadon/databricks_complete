@@ -47,7 +47,7 @@ const GRAPHICS = {
   'TitleCard-5min': () => <TitleCard tier="The 5-minute walk-through" />,
   GapIntro: () => <GapIntro />,
   NumberReveal: () => <NumberReveal />,
-  'CostCallout-Tema': () => <CostCallout withAI={false} />,
+  'CostCallout-Tema': ({cue}: GProps) => <CostCallout withAI={false} cue={cue} />,
   'CostCallout-AI': () => <CostCallout withAI />,
   FutureState: () => <FutureState />,
   'EndCard-2min': () => <EndCard ask="Thirty minutes to see if this works here?" sub="One certified definition per metric, one access rule, every tool reading from it." />,
@@ -62,7 +62,29 @@ const GRAPHICS = {
   GapSummary: () => <GapSummary />,
 };
 
-type Block = {from: number; len: number; part: Part; sceneId: string; cap?: Capture | null; k?: number};
+type Block = {from: number; len: number; part: Part; sceneId: string; cap?: Capture | null; k?: number; cue?: number};
+type GProps = {cue?: number};
+
+// Graphics that animate on a spoken phrase: the scene and the words that trigger it.
+const CUES: Record<string, RegExp> = {'T2-06': /number can be|evaluated by/i};
+
+/** Frame (from the start of the scene) where `re` is first spoken, from the clip's captions; else a guess from the text. */
+const cueFrame = async (sceneId: string, re: RegExp, text: string): Promise<number> => {
+  try {
+    const r = await fetch(staticFile(`audio/${sceneId}.srt`));
+    if (r.ok) {
+      const blocks = (await r.text()).split(/\r?\n\r?\n/);
+      const words = re.source.split('|')[0].split(' ')[0];
+      for (const b of blocks) {
+        const m = b.match(/(\d+):(\d+):(\d+),(\d+) -->/);
+        if (m && new RegExp(words, 'i').test(b)) return Math.max(0, Math.round((+m[1] * 3600 + +m[2] * 60 + +m[3] + +m[4] / 1000) * FPS) - 4);
+      }
+    }
+  } catch {}
+  const plain = text.replace(/<[^>]+>/g, '');
+  const i = plain.search(re);
+  return Math.round(((i < 0 ? 0.7 : i / plain.length) * sec(sceneId)) * FPS);
+};
 type Props = {video: 'T1' | 'T2' | 'T3'; blocks: Block[]; audio: {id: string; from: number}[]; spielParts: number[]};
 
 export const spielPartsFrames = () => ['T1-01', 'T1-02', 'T1-03', 'T1-04', 'T1-05'].map((id, i) => Math.ceil((sec(id) + (i === 4 ? 2.5 : 0.4)) * FPS));
@@ -110,7 +132,8 @@ export const calcFullVideo: CalculateMetadataFunction<Props> = async ({props}) =
     if (await exists(`audio/${s.id}.mp3`)) audio.push({id: s.id, from});
     for (const part of parts) {
       const len = Math.ceil(('sec' in part && part.sec ? part.sec : fill) * FPS);
-      blocks.push({from, len, part, sceneId: s.id, cap, k});
+      const cue = 'g' in part && CUES[s.id] ? await cueFrame(s.id, CUES[s.id], s.text) : undefined;
+      blocks.push({from, len, part, sceneId: s.id, cap, k, cue});
       from += len;
     }
   }
@@ -133,7 +156,7 @@ export const FullVideo: React.FC<Props> = ({video, blocks, audio, spielParts}) =
         const firstScreen = 'screen' in b.part && !blocks.slice(0, i).some((x) => x.sceneId === b.sceneId && 'screen' in x.part);
         return (
           <Sequence key={i} from={b.from} durationInFrames={b.len}>
-            <Fade len={b.len}>{G ? <G /> : <ScreenScene cap={b.cap ?? null} k={b.k ?? 1} sceneId={b.sceneId} />}</Fade>
+            <Fade len={b.len}>{G ? <G cue={b.cue} /> : <ScreenScene cap={b.cap ?? null} k={b.k ?? 1} sceneId={b.sceneId} />}</Fade>
             {firstScreen && LOWER_THIRD_ON.has(b.sceneId) && (
               <Sequence from={15} durationInFrames={6 * FPS}>
                 <LowerThird title="Tema is fictional" sub="70,000 synthetic people, built at our scale on purpose" />

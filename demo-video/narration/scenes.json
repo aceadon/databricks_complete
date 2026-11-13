@@ -76,7 +76,7 @@
           "visual": "screen",
           "graphic": "None",
           "action": "Click into the metric view query (MEASURE(headcount) FROM workforce_metrics, 2025-Q2) and run it. Hover over 58,862.",
-          "text": "Same table, same question, through the semantic layer. <break time=\"0.3s\" /> Fifty-eight thousand, eight hundred sixty-two. The rule, headcount is the last month of the period, never a sum, lives in the definition. So nobody can get it wrong. Not in Sequel, not on a dashboard, and not with an AI agent."
+          "text": "Same table, same question, through the semantic layer. <break time=\"0.3s\" /> Fifty-eight thousand, eight hundred sixty-two. The rule that headcount is the last month of the period, never a sum, lives in the definition. So nobody can get it wrong. Not in Sequel, not on a dashboard, and not with an AI agent."
         },
         {
           "id": "T2-05",
