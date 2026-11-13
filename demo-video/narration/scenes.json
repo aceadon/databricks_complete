@@ -161,7 +161,7 @@
           "visual": "graphic",
           "graphic": "BenchmarkCard (fill in scores in src/data.ts, or skip this graphic)",
           "action": "None.",
-          "text": "Same AI, same data. The difference is the definitions and rules underneath. On a twenty-question benchmark, the agent on the semantic layer got far more right than the one on raw tables. AI is only as good as the definitions under it, and the semantic layer is what makes it safe to give HR data to an AI assistant."
+          "text": "Same AI, same data. The difference is the definitions and rules underneath. AI is only as good as the definitions under it, and the semantic layer is what makes it safe to give HR data to an AI assistant."
         },
         {
           "id": "T3-09",
