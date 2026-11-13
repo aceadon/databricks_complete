@@ -46,6 +46,8 @@ async function replaceSql(d, sql, {visible = true} = {}) {
   const got = await editorTextViaCopy(d);
   if (got !== null && norm(got) !== norm(sql)) throw new Error(`The SQL editor holds the wrong text: "${norm(got).slice(0, 120)}"`);
   if (got === null) d.log('  (could not read the editor back to check the query; carrying on)');
+  // Move the pointer off the query so it doesn't cover the code or the result.
+  if (visible) await d.moveTo({x: d.viewport.width * 0.72, y: d.viewport.height * 0.36});
 }
 
 async function setClipboard(d, text) {
