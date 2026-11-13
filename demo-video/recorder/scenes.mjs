@@ -133,7 +133,38 @@ const genieInput = [
   (p) => p.locator('[contenteditable="true"]'),
 ];
 
+/** Close Genie's right-hand panel (About / Sources / Instructions), which shows the owner's email. Cut from the video. */
+async function hideGeniePanel(d) {
+  await d.waiting(async () => {
+    for (let i = 0; i < 3; i++) {
+      const about = d.page.getByRole('tab', {name: /^about$/i}).first();
+      if (!(await about.isVisible().catch(() => false))) break;
+      const tab = await about.boundingBox();
+      // The panel's close button: an "x" button on the same row as the tabs, to their right.
+      let closed = false;
+      for (const btn of await d.page.getByRole('button', {name: /close/i}).all()) {
+        const b = await btn.boundingBox().catch(() => null);
+        if (b && tab && b.x > tab.x && Math.abs(b.y + b.height / 2 - (tab.y + tab.height / 2)) < 40) {
+          await btn.click().catch(() => {});
+          closed = true;
+          break;
+        }
+      }
+      if (!closed) {
+        const cfg = d.page.getByRole('button', {name: /^configure$/i}).first();
+        if (await cfg.isVisible().catch(() => false)) await cfg.click().catch(() => {});
+      }
+      await new Promise((r) => setTimeout(r, 600));
+    }
+    // Never record a personal email address.
+    if (await d.page.getByText(/[\w.+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.com/i).first().isVisible().catch(() => false)) {
+      await d.manual("An email address is on screen. Close Genie's right-hand panel (the X next to About / Sources), then press Enter.");
+    }
+  }, 'cut');
+}
+
 async function askGenie(d, question) {
+  await hideGeniePanel(d);
   const box = await d.find(genieInput, 20000);
   if (!box) {
     await d.manual(`Type this question into Genie and send it: ${question}`);
