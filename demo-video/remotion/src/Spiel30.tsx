@@ -131,7 +131,7 @@ const FiveAttritions: React.FC = () => {
 
 const Layer: React.FC = () => {
   const band = useIn(20);
-  const tools = ['SQL', 'Dashboards', 'Power BI', 'Genie (AI)'];
+  const tools = ['SQL', 'Dashboards', 'Tableau', 'Genie (AI)'];
   return (
     <Bg>
       <AbsoluteFill style={{padding: '90px 180px', justifyContent: 'center'}}>

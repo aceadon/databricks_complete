@@ -2,9 +2,9 @@
 
 Reference answer for labs/week-11, step 5. The last column is for your own company: fill it in from what you learn at work. Product details change quickly; check each vendor's current docs before you quote this.
 
-| | Unity Catalog Metrics (metric views) | dbt Semantic Layer (MetricFlow) | Power BI / Tableau models | Your company today |
+| | Unity Catalog Metrics (metric views) | dbt Semantic Layer (MetricFlow) | Tableau data sources | Your company today |
 |---|---|---|---|---|
-| **Where definitions live** | YAML inside a Unity Catalog object, next to the tables, versioned in Git as `.sql` files and deployed with a bundle | YAML in the dbt project, versioned in Git | Inside each BI file or published model (a Power BI semantic model, Tableau data sources) | *(spreadsheets? one BI tool's model? SQL in each report?)* |
+| **Where definitions live** | YAML inside a Unity Catalog object, next to the tables, versioned in Git as `.sql` files and deployed with a bundle | YAML in the dbt project, versioned in Git | Inside each BI file or published model (Tableau data sources and workbooks) | *(spreadsheets? one BI tool's model? SQL in each report?)* |
 | **Who can use them** | SQL (`MEASURE()`), AI/BI dashboards, Genie, notebooks, and BI tools through Databricks connectors | BI and other tools through dbt Cloud's semantic layer APIs and integrations | Mostly that BI tool's own users; other tools reach it with more effort | |
 | **Governance** | Unity Catalog grants on the metric view; row filters and column masks on source tables apply per reader; tags, lineage and audit come with the catalog | Inherits the warehouse's permissions; governance is mostly the warehouse's job | The BI tool's own row-level security, defined again in each model | |
 | **Change process** | Pull request on the YAML and the definitions doc; `databricks bundle deploy` (Week 10) | Pull request; dbt deployment jobs | Often edits in a desktop file and a republish; Git support varies | |

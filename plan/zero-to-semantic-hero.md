@@ -51,7 +51,7 @@ Databricks doesn't ship a single product named "semantic layer." It is a set of 
 2. **Unity Catalog Metrics (metric views).** KPIs defined once in YAML or a low-code editor, with dimensions, measures, joins, windows, and level-of-detail logic. Queried with `MEASURE()` from SQL, dashboards, Genie, and external BI tools. Local metric views (scoped to a dashboard) went GA in August 2026; multi-fact relationships and materialization are in Public Preview.
 3. **Business meaning.** Unity Catalog Semantics brings together metrics, a **Business Glossary** (preview), and **Domains** (Public Preview) so terms and assets are organized the way the business thinks.
 4. **Genie Ontology.** A self-updating context layer (Public Preview, on by default since August 2026) that feeds your metrics, descriptions, and usage into Genie so its answers use your definitions.
-5. **Consumption.** AI/BI Dashboards, **Genie Agents** (formerly Genie Spaces), **Genie One** (the business-user "coworker"), Databricks One, and external tools such as Power BI and Tableau.
+5. **Consumption.** AI/BI Dashboards, **Genie Agents** (formerly Genie Spaces), **Genie One** (the business-user "coworker"), Databricks One, and external tools such as Tableau.
 6. **Governance and trust.** Governed tags, data classification, ABAC policies (GA), row filters and column masks, lineage (including external lineage, GA), certification and deprecation tags, and system tables for usage.
 
 The plan walks up this stack, building one connected project as you go.
@@ -300,7 +300,7 @@ HR data is where governance stops being theory. This phase is longer and richer 
 **Learn**
 
 - **Metric views as code:** keep YAML in Git, deploy with Databricks Asset Bundles or dbt, and review changes through pull requests.
-- **BI interoperability:** connecting Power BI and Tableau to metric views, and importing existing Power BI/Tableau models and workbooks into Databricks (GA for dashboards; model import in beta for metrics).
+- **BI interoperability:** connecting Tableau to metric views, and importing existing Tableau workbooks into Databricks (GA for dashboards; model import in beta for metrics).
 - **Open Semantic Interchange (OSI)** and the open-source metric view implementation in Apache Spark and Unity Catalog OSS, and what that means for avoiding lock-in.
 - Third-party semantic and catalog tools (dbt Semantic Layer, AtScale, Cube, Atlan) and where each fits or overlaps with Unity Catalog Metrics.
 - HR system integration patterns: how data from Workday, SuccessFactors, or similar systems typically lands in Databricks (Lakeflow Connect has connectors for several HR systems; check which match your company).
@@ -309,7 +309,7 @@ HR data is where governance stops being theory. This phase is longer and richer 
 **Build**
 
 1. Move your metric YAML into this repo with a deploy bundle, and change one metric definition (for example, excluding interns from attrition) through a pull request.
-2. Connect Power BI Desktop or Tableau (trial) to a metric view, or document the steps if you can't install them.
+2. Connect Tableau Desktop (or a Tableau trial) to a metric view, or document the steps if you can't install them.
 3. A cross-domain question: join your people metrics with a cost or sales metric (make a small synthetic ad revenue or support ticket table for Tema), for example "ad revenue per employee", "AI headcount cost vs AI-driven revenue" or "Advertiser Support headcount vs ticket volume". This is the kind of question the semantic layer makes possible and an HR tool can't answer.
 4. Write a short comparison: Unity Catalog Metrics vs your company's current HR reporting or BI semantic models.
 

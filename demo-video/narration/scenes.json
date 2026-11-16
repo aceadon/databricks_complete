@@ -33,7 +33,7 @@
           "visual": "graphic",
           "graphic": "Spiel30 (part 4: the semantic layer)",
           "action": "None.",
-          "text": "So I built a thin layer on top. A semantic layer. Every HR metric, and every access rule, defined once. So dashboards, Power BI, and AI all give the same answer."
+          "text": "So I built a thin layer on top. A semantic layer. Every HR metric, and every access rule, defined once. So dashboards, Tableau, and AI all give the same answer."
         },
         {
           "id": "T1-05",
@@ -76,7 +76,7 @@
           "visual": "screen",
           "graphic": "None",
           "action": "Click into the metric view query (MEASURE(headcount) FROM workforce_metrics, 2025-Q2) and run it. Hover over 58,862.",
-          "text": "Same table, same question, through the semantic layer. <break time=\"0.3s\" /> 58,862. The rule, headcount is the last month of the period, never a sum, lives in the definition. So nobody can get it wrong. Not in SQL, not in the dashboard, not in Power BI, and not in Genie."
+          "text": "Same table, same question, through the semantic layer. <break time=\"0.3s\" /> 58,862. The rule, headcount is the last month of the period, never a sum, lives in the definition. So nobody can get it wrong. Not in SQL, not in the dashboard, not in Tableau, and not in Genie."
         },
         {
           "id": "T2-05",

@@ -9,14 +9,14 @@ Show that the semantic layer reaches beyond Databricks: connect a BI tool to a m
 ## Before you start
 
 - Weeks 3 to 10 done.
-- Optional: Power BI Desktop (Windows) or a Tableau trial.
+- Optional: Tableau Desktop (or a Tableau trial).
 - A branch `week-11`.
 
 ## Steps
 
 ### 1. Connect a BI tool
 
-Follow the Databricks docs for connecting **Power BI** or **Tableau** to Unity Catalog metric views. Build one chart: headcount by division by quarter. Check that the quarter values are quarter-end headcount (4,176 for 2025-Q2), not a sum.
+Follow the Databricks docs for connecting **Tableau** to Unity Catalog metric views. Build one chart: headcount by division by quarter. Check that the quarter values are quarter-end headcount (4,176 for 2025-Q2), not a sum.
 
 If you can't install either tool, write the steps from the docs in `docs/bi-connection-notes.md` with the questions you'd ask your BI team (which tool, gateway, who authenticates, whether row filters pass through per user).
 
@@ -80,7 +80,7 @@ Add `business_metrics` to your Genie Agent and ask "What's our revenue per emplo
 
 Create `docs/semantic-tools-comparison.md`, one page:
 
-| | Unity Catalog Metrics | dbt Semantic Layer | Power BI / Tableau models | Your company today |
+| | Unity Catalog Metrics | dbt Semantic Layer | Tableau data sources | Your company today |
 |---|---|---|---|---|
 | Where definitions live | | | | |
 | Who can use them (SQL, BI, AI) | | | | |
