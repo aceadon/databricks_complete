@@ -6,7 +6,7 @@ Reference notes for connecting a BI tool to Unity Catalog metric views. Free Edi
 
 1. In Databricks, open your SQL warehouse, **Connection details**, and copy the server hostname and HTTP path.
 2. In Power BI Desktop: **Get data > Azure Databricks** (or **Databricks**), paste them, sign in with OAuth (preferred) or a personal access token.
-3. Pick `tema_hr_semantic.workforce_metrics` in your catalog (`workspace` by default). Use **DirectQuery**, so every visual sends a query and the metric view does the aggregation. Import mode would copy pre-aggregated rows and lose the semi-additive logic.
+3. Pick `workspace.tema_hr_semantic.workforce_metrics`. Use **DirectQuery**, so every visual sends a query and the metric view does the aggregation. Import mode would copy pre-aggregated rows and lose the semi-additive logic.
 4. Build: headcount by division by quarter.
 5. **Check:** 2025-Q2 shows **4,176**, not 12,429. If you see 12,429, the tool is summing rows the connector returned at month grain: the connection isn't using the metric view's measure, so check the connector version and the metric view docs for BI tools.
 
