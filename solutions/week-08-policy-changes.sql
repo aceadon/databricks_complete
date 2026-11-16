@@ -5,7 +5,8 @@
 -- (rerun the matching cell of 01_hrbp_access_model.sql) before trying the next.
 -- Untested in Databricks.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_secure;
 
 -- Before you change anything, record the baseline as hrbp_a, so you have a "before" for your PR.

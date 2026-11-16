@@ -159,16 +159,22 @@ This is the heart of the plan. Spend the most time here. HR metrics are a great 
 1. A first metric view on the monthly snapshot:
 
    ```sql
-   CREATE OR REPLACE VIEW workspace.tema_hr_semantic.workforce_metrics
-   WITH METRICS LANGUAGE YAML AS $$
+   DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+   USE CATALOG IDENTIFIER(tema_catalog);
+
+   -- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+   -- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+   DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+   SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.workforce_metrics
+   WITH METRICS LANGUAGE YAML AS $$' || replace("
    version: 1.1
-   source: workspace.tema_hr_gold.fact_headcount_monthly
+   source: {catalog}.tema_hr_gold.fact_headcount_monthly
    joins:
      - name: dept
-       source: workspace.tema_hr_gold.dim_department
+       source: {catalog}.tema_hr_gold.dim_department
        on: source.department_id = dept.department_id
      - name: job
-       source: workspace.tema_hr_gold.dim_job
+       source: {catalog}.tema_hr_gold.dim_job
        on: source.job_id = job.job_id
    dimensions:
      - name: Month
@@ -198,10 +204,11 @@ This is the heart of the plan. Spend the most time here. HR metrics are a great 
        expr: COUNT(1) FILTER (WHERE source.is_termination_in_month)
      - name: Average Salary
        expr: AVG(source.annual_base_salary)
-   $$;
+   ", '{catalog}', tema_catalog) || '$$';
+   EXECUTE IMMEDIATE metric_view_sql;
 
    SELECT Division, MEASURE(Headcount), MEASURE(Leavers)
-   FROM workspace.tema_hr_semantic.workforce_metrics
+   FROM tema_hr_semantic.workforce_metrics
    WHERE Month BETWEEN '2026-01-01' AND '2026-10-31'
    GROUP BY ALL;
    ```

@@ -6,6 +6,9 @@
 --   Week 10 definition (part-time excluded):    Oct 2026 = 581 / 4,488 = 12.9%  (Oct 2025 11.8%)
 -- Voluntary 10.0% -> 9.9%, regretted 4.3% -> 4.2%, first-year 24.0% -> 24.0%.
 -- =====================================================================================
+
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 WITH monthly AS (
   SELECT snapshot_month,
          COUNT_IF(is_active_month_end)                       AS headcount,
@@ -14,7 +17,7 @@ WITH monthly AS (
          COUNT_IF(is_regretted_termination_in_month)         AS regretted_leavers,
          COUNT_IF(is_termination_in_month AND is_first_year) AS first_year_leavers,
          COUNT_IF(is_active_month_end AND is_first_year)     AS first_year_headcount
-  FROM workspace.tema_hr_gold.fact_headcount_monthly
+  FROM tema_hr_gold.fact_headcount_monthly
   WHERE employment_type <> 'Part-time'     -- Week 10 definition. Delete this line for the Week 4 definition.
   GROUP BY ALL
 )
@@ -32,11 +35,11 @@ ORDER BY snapshot_month DESC;
 -- Metric view vs truth, every month (expect 0 rows)
 SELECT m.month, m.attrition AS metric_view, t.attrition AS truth
 FROM (SELECT month, ROUND(100 * MEASURE(attrition_rate_t12m), 1) AS attrition
-      FROM workspace.tema_hr_semantic.retention_metrics GROUP BY ALL) m
+      FROM tema_hr_semantic.retention_metrics GROUP BY ALL) m
 JOIN (
   WITH monthly AS (
     SELECT snapshot_month, COUNT_IF(is_active_month_end) AS headcount, COUNT_IF(is_termination_in_month) AS leavers
-    FROM workspace.tema_hr_gold.fact_headcount_monthly
+    FROM tema_hr_gold.fact_headcount_monthly
     WHERE employment_type <> 'Part-time' GROUP BY ALL)
   SELECT snapshot_month AS month, ROUND(100 * SUM(leavers) OVER w / AVG(headcount) OVER w, 1) AS attrition
   FROM monthly WINDOW w AS (ORDER BY snapshot_month ROWS BETWEEN 11 PRECEDING AND CURRENT ROW)
@@ -52,6 +55,6 @@ SELECT division,
        MEASURE(voluntary_attrition_rate_t12m) AS voluntary,
        MEASURE(regretted_attrition_rate_t12m) AS regretted,
        MEASURE(first_year_attrition_rate_t12m) AS first_year
-FROM workspace.tema_hr_semantic.retention_metrics
+FROM tema_hr_semantic.retention_metrics
 WHERE month = '2026-10-31'
 GROUP BY ALL ORDER BY attrition DESC;

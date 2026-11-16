@@ -22,10 +22,10 @@ A combo chart needs both measures in one dataset. Because the measures live in t
 ```sql
 SELECT w.month, w.ai_headcount, r.ai_regretted_attrition
 FROM (SELECT month, MEASURE(headcount) AS ai_headcount
-      FROM workspace.tema_hr_semantic.workforce_metrics
+      FROM tema_hr_semantic.workforce_metrics
       WHERE division = 'AI' GROUP BY ALL) w
 JOIN (SELECT month, MEASURE(regretted_attrition_rate_t12m) AS ai_regretted_attrition
-      FROM workspace.tema_hr_semantic.retention_metrics
+      FROM tema_hr_semantic.retention_metrics
       WHERE division = 'AI' GROUP BY ALL) r USING (month)
 ORDER BY month;
 ```

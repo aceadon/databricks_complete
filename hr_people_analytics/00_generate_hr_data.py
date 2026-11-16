@@ -720,3 +720,9 @@ if __name__ == "__main__" and "dbutils" in globals():
         _write(pd.concat(batch), f"`{catalog}`.`{schema}`.`headcount_monthly`", "overwrite" if first else "append")
         total += sum(len(b) for b in batch)
     print(f"{catalog}.{schema}.headcount_monthly: {total:,} rows")
+    # Mark every table as synthetic, so nobody mistakes it for real people data in a shared catalog
+    for name in [*tables, "headcount_monthly"]:
+        spark.sql(f"COMMENT ON TABLE `{catalog}`.`{schema}`.`{name}` IS "
+                  f"'SYNTHETIC DATA: generated for {COMPANY}, a fictional company. Not real people. "
+                  f"Source: hr_people_analytics/00_generate_hr_data.py'")
+        spark.sql(f"ALTER TABLE `{catalog}`.`{schema}`.`{name}` SET TBLPROPERTIES ('synthetic_data' = 'true')")

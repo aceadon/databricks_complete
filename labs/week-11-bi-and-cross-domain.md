@@ -28,7 +28,8 @@ If you can't install either tool, write the steps from the docs in `docs/bi-conn
 Free Edition has no Tema revenue data, so make some. Create `hr_people_analytics/gold/10_fact_ad_revenue.sql`:
 
 ```sql
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 -- Synthetic monthly ad revenue and support tickets for Tema. Fictional numbers.
@@ -61,9 +62,9 @@ You can join two metric views' results on their shared dimension:
 ```sql
 SELECT p.quarter, b.revenue / p.headcount AS revenue_per_employee
 FROM (SELECT quarter, MEASURE(headcount) AS headcount
-      FROM workspace.tema_hr_semantic.workforce_metrics GROUP BY ALL) p
+      FROM tema_hr_semantic.workforce_metrics GROUP BY ALL) p
 JOIN (SELECT quarter, MEASURE(ad_revenue) AS revenue
-      FROM workspace.tema_hr_semantic.business_metrics GROUP BY ALL) b USING (quarter)
+      FROM tema_hr_semantic.business_metrics GROUP BY ALL) b USING (quarter)
 ORDER BY quarter;
 ```
 

@@ -5,6 +5,9 @@
 -- Untested in Databricks.
 -- =====================================================================================
 
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+
 -- -------------------------------------------------------------------------------------
 -- (a) retention_metrics.sql: add the exclusion to EVERY building block, numerators AND
 --     denominators. Only the changed measures are shown; the rates don't change because
@@ -43,7 +46,7 @@ WITH monthly AS (
          COUNT_IF(is_termination_in_month)            AS leavers,
          COUNT_IF(is_voluntary_termination_in_month)  AS voluntary_leavers,
          COUNT_IF(is_regretted_termination_in_month)  AS regretted_leavers
-  FROM workspace.tema_hr_gold.fact_headcount_monthly
+  FROM tema_hr_gold.fact_headcount_monthly
   WHERE employment_type <> 'Part-time'          -- the only change
   GROUP BY ALL
 )
@@ -71,11 +74,11 @@ ORDER BY snapshot_month DESC;
 -- Metric view check: the two sides should match (expect 0 rows)
 SELECT m.month, m.attrition, t.attrition
 FROM (SELECT month, ROUND(100 * MEASURE(attrition_rate_t12m), 1) AS attrition
-      FROM workspace.tema_hr_semantic.retention_metrics GROUP BY ALL) m
+      FROM tema_hr_semantic.retention_metrics GROUP BY ALL) m
 JOIN (
   WITH monthly AS (
     SELECT snapshot_month, COUNT_IF(is_active_month_end) AS headcount, COUNT_IF(is_termination_in_month) AS leavers
-    FROM workspace.tema_hr_gold.fact_headcount_monthly
+    FROM tema_hr_gold.fact_headcount_monthly
     WHERE employment_type <> 'Part-time' GROUP BY ALL)
   SELECT snapshot_month AS month,
          ROUND(100 * SUM(leavers) OVER w / AVG(headcount) OVER w, 1) AS attrition

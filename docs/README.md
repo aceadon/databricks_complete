@@ -11,7 +11,7 @@ The human side of the semantic layer: the definitions, checklists and proposals 
 | [demo-script.md](demo-script.md) | 6 | The 30-minute demo, minute by minute |
 | [demo-scripts-gap-selling.md](demo-scripts-gap-selling.md) | 6 | 30-second, 2-minute and 5-minute versions of the pitch, built on Gap Selling |
 | [semantic-tools-comparison.md](semantic-tools-comparison.md) | 5 | Unity Catalog Metrics vs dbt, BI-tool models, AtScale, Cube, Atlan; OSI |
-| [bi-connection-notes.md](bi-connection-notes.md) | 5 | Connecting Power BI or Tableau to a metric view, and questions for the BI team |
+| [bi-connection-notes.md](bi-connection-notes.md) | 5 | Connecting Tableau to a metric view, and questions for the BI team |
 | [examples/bundle-ci.yml](examples/bundle-ci.yml) | 5 | Optional GitHub Actions workflow for the bundle (Week 10, step 4) |
 
 In this reference repo every document is filled in, as an example to compare with yours.

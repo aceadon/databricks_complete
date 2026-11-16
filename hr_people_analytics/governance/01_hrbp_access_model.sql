@@ -7,14 +7,15 @@
 -- MAGIC everyone who reports, directly or indirectly, to a leader they are assigned to.
 -- MAGIC
 -- MAGIC Prerequisite: run `../00_generate_hr_data.py` first. This notebook reads `tema_hr_raw` and creates
--- MAGIC everything in a new schema, `tema_hr_secure`. Change the catalog below if yours isn't `workspace`.
+-- MAGIC everything in a new schema, `tema_hr_secure`. Set `tema_catalog` in the first SQL cell if your catalog isn't `workspace`.
 -- MAGIC
 -- MAGIC Uses recursive CTEs, SQL session variables, row filters and column masks. Run it on serverless
 -- MAGIC compute or a recent SQL warehouse.
 
 -- COMMAND ----------
 
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 CREATE SCHEMA IF NOT EXISTS tema_hr_secure
   COMMENT 'Tema (fictional) HR data with HRBP-scoped access to sensitive fields. Synthetic data only.';
 

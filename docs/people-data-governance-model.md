@@ -55,7 +55,7 @@ ALTER TABLE tema_hr_gold.dim_employee_sensitive ALTER COLUMN employee_id SET TAG
 
 -- One policy for every restricted column in the catalog
 CREATE POLICY hr_restricted_columns
-ON CATALOG workspace
+ON CATALOG workspace   -- your catalog (see README, "Choose your catalog")
 COMMENT 'Mask every hr_sensitivity=restricted column outside the HR scope of the viewer.'
 COLUMN MASK tema_hr_secure.mask_by_scope   -- a new mask you'd write, like mask_text but for any type
 TO `account users` EXCEPT `hr_admins`

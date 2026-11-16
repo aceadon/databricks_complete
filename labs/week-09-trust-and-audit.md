@@ -20,7 +20,7 @@ At 5,000 people, "average compa-ratio by job level" includes E1 and E2, which ar
 ```sql
 -- See the problem
 SELECT job_level, MEASURE(avg_compa_ratio), MEASURE(headcount)
-FROM workspace.tema_hr_semantic.pay_metrics   -- add a headcount measure to pay_metrics if it lacks one
+FROM tema_hr_semantic.pay_metrics   -- add a headcount measure to pay_metrics if it lacks one
 WHERE month = '2026-10-31'
 GROUP BY ALL ORDER BY 3;
 ```
@@ -30,13 +30,13 @@ GROUP BY ALL ORDER BY 3;
 1. **A suppressed view** on top of the metric view, used by dashboards:
 
    ```sql
-   CREATE OR REPLACE VIEW workspace.tema_hr_semantic.pay_by_level_safe AS
+   CREATE OR REPLACE VIEW tema_hr_semantic.pay_by_level_safe AS
    SELECT month, division, job_level,
           CASE WHEN headcount >= 5 THEN avg_compa_ratio END AS avg_compa_ratio,
           CASE WHEN headcount >= 5 THEN headcount END       AS headcount
    FROM (SELECT month, division, job_level,
                 MEASURE(avg_compa_ratio) AS avg_compa_ratio, MEASURE(headcount) AS headcount
-         FROM workspace.tema_hr_semantic.pay_metrics GROUP BY ALL);
+         FROM tema_hr_semantic.pay_metrics GROUP BY ALL);
    ```
 
 2. **A rule inside the measure**, so the metric itself returns nothing for small groups:
@@ -56,11 +56,17 @@ Note the weakness of both: someone can still subtract. Division total minus ever
 
 The goal: a broad audience can query headcount and attrition by department but can't read rows in `tema_hr_gold`.
 
+> [!CAUTION]
+> **In a shared company workspace, don't run these grants as written.** `account users` is everyone in your company's Databricks account. Swap it for a test group or one named colleague, and agree it with whoever owns the catalog first.
+
 ```sql
-GRANT USE CATALOG ON CATALOG workspace TO `account users`;
-GRANT USE SCHEMA ON SCHEMA workspace.tema_hr_semantic TO `account users`;
-GRANT SELECT ON VIEW workspace.tema_hr_semantic.workforce_metrics TO `account users`;
-GRANT SELECT ON VIEW workspace.tema_hr_semantic.retention_metrics TO `account users`;
+-- The catalog name comes from tema_catalog, so this GRANT is built as text and then run
+DECLARE OR REPLACE VARIABLE grant_sql STRING;
+SET VAR grant_sql = 'GRANT USE CATALOG ON CATALOG ' || tema_catalog || ' TO `account users`';
+EXECUTE IMMEDIATE grant_sql;
+GRANT USE SCHEMA ON SCHEMA tema_hr_semantic TO `account users`;
+GRANT SELECT ON VIEW tema_hr_semantic.workforce_metrics TO `account users`;
+GRANT SELECT ON VIEW tema_hr_semantic.retention_metrics TO `account users`;
 -- Nothing granted on tema_hr_gold or tema_hr_raw
 ```
 

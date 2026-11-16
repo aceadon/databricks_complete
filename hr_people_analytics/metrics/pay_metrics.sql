@@ -6,23 +6,29 @@
 -- If the CASE-around-aggregates form of avg_compa_ratio_safe is refused, delete that measure and use
 -- pay_by_level_safe.sql (approach 1) instead.
 -- =====================================================================================
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.pay_metrics
-WITH METRICS LANGUAGE YAML AS $$
+
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.pay_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema pay positioning. Month-end snapshot of active employees; all measures are semi-additive over time. Restricted: pay data."
-source: workspace.tema_hr_gold.fact_headcount_monthly
+comment: 'Tema pay positioning. Month-end snapshot of active employees; all measures are semi-additive over time. Restricted: pay data.'
+source: {catalog}.tema_hr_gold.fact_headcount_monthly
 joins:
   - name: dt
-    source: workspace.tema_hr_gold.dim_date
+    source: {catalog}.tema_hr_gold.dim_date
     on: source.snapshot_month = dt.month_end
   - name: dept
-    source: workspace.tema_hr_gold.dim_department
+    source: {catalog}.tema_hr_gold.dim_department
     on: source.department_id = dept.department_id
   - name: job
-    source: workspace.tema_hr_gold.dim_job
+    source: {catalog}.tema_hr_gold.dim_job
     on: source.job_id = job.job_id
   - name: loc
-    source: workspace.tema_hr_gold.dim_location
+    source: {catalog}.tema_hr_gold.dim_location
     on: source.location_id = loc.location_id
 dimensions:
   - name: month
@@ -44,7 +50,7 @@ dimensions:
 measures:
   - name: headcount
     display_name: Headcount
-    comment: "People employed at period end. Shown next to pay so small groups are visible."
+    comment: 'People employed at period end. Shown next to pay so small groups are visible.'
     expr: COUNT(DISTINCT source.employee_id) FILTER (WHERE source.is_active_month_end)
     window:
       - order: month
@@ -52,8 +58,8 @@ measures:
         semiadditive: last
   - name: avg_compa_ratio
     display_name: Average compa-ratio
-    comment: "Base salary / (band midpoint x location pay factor), averaged over people active at period end. 1.00 = paid at midpoint."
-    synonyms: ["compa ratio", "pay vs midpoint"]
+    comment: 'Base salary / (band midpoint x location pay factor), averaged over people active at period end. 1.00 = paid at midpoint.'
+    synonyms: ['compa ratio', 'pay vs midpoint']
     expr: AVG(source.annual_base_salary / (job.salary_band_mid * loc.location_pay_factor)) FILTER (WHERE source.is_active_month_end)
     window:
       - order: month
@@ -70,7 +76,7 @@ measures:
   # Grant the broad audience this measure, never avg_compa_ratio or average_salary.
   - name: avg_compa_ratio_safe
     display_name: Average compa-ratio (suppressed under 5)
-    comment: "Average compa-ratio, or empty when the group has fewer than 5 people at period end."
+    comment: 'Average compa-ratio, or empty when the group has fewer than 5 people at period end.'
     expr: >
       CASE WHEN COUNT(DISTINCT source.employee_id) FILTER (WHERE source.is_active_month_end) >= 5
            THEN AVG(source.annual_base_salary / (job.salary_band_mid * loc.location_pay_factor))
@@ -80,4 +86,5 @@ measures:
       - order: month
         range: current
         semiadditive: last
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;

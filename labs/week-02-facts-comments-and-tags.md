@@ -18,7 +18,8 @@ Finish Tema's star schema with the fact tables, then document it well enough tha
 Create `hr_people_analytics/gold/02_facts.sql`:
 
 ```sql
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 -- One row per employee per month they were employed. The workhorse for headcount and attrition.
@@ -161,11 +162,11 @@ SELECT 'fact_requisitions', COUNT(*) FROM tema_hr_gold.fact_requisitions UNION A
 SELECT 'fact_engagement',   COUNT(*) FROM tema_hr_gold.fact_engagement;
 
 -- Columns with no comment (expect 0 rows)
-SELECT table_name, column_name FROM workspace.information_schema.columns
+SELECT table_name, column_name FROM information_schema.columns
 WHERE table_schema = 'tema_hr_gold' AND (comment IS NULL OR comment = '');
 
 -- Tagged columns (expect your sensitive columns)
-SELECT * FROM workspace.information_schema.column_tags WHERE schema_name = 'tema_hr_gold';
+SELECT * FROM information_schema.column_tags WHERE schema_name = 'tema_hr_gold';
 ```
 
 ## Why this matters at work

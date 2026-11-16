@@ -8,7 +8,7 @@ Understand how Unity Catalog organises data and who can see it, then build the f
 
 ## Before you start
 
-- Week 0 done: `workspace.tema_hr_raw` has 12 tables.
+- Week 0 done: `tema_hr_raw` has 12 tables.
 - A branch `week-01` in your Git folder.
 
 ## Learn (about 2 hours)
@@ -26,7 +26,8 @@ Work through these, then check yourself with the questions below.
 ### 1. Explore permissions on what you already have
 
 ```sql
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 SHOW GRANTS ON SCHEMA tema_hr_raw;
 DESCRIBE TABLE EXTENDED tema_hr_raw.employees;   -- look for Owner
 ```
@@ -77,7 +78,8 @@ The `effective_from <= date AND (effective_to IS NULL OR effective_to >= date)` 
 In your Git folder, create a SQL notebook `hr_people_analytics/gold/01_dimensions.sql` and start it with:
 
 ```sql
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 CREATE SCHEMA IF NOT EXISTS tema_hr_gold
   COMMENT 'Tema (fictional) people analytics star schema. Clean, documented tables for metrics, dashboards and Genie. Synthetic data only.';
 USE SCHEMA tema_hr_gold;

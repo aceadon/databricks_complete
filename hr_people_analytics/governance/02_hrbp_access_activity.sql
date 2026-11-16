@@ -17,7 +17,8 @@
 
 -- COMMAND ----------
 
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_secure;
 
 -- COMMAND ----------

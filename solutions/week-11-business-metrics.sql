@@ -3,14 +3,20 @@
 -- Save the view as hr_people_analytics/metrics/business_metrics.sql. Untested in Databricks.
 -- =====================================================================================
 
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.business_metrics
-WITH METRICS LANGUAGE YAML AS $$
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.business_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema (fictional) monthly ad revenue and advertiser support tickets. Synthetic, sized for a 70,000-person company. Both measures are additive over time."
-source: workspace.tema_hr_gold.fact_business_monthly
+comment: 'Tema (fictional) monthly ad revenue and advertiser support tickets. Synthetic, sized for a 70,000-person company. Both measures are additive over time.'
+source: {catalog}.tema_hr_gold.fact_business_monthly
 joins:
   - name: dt
-    source: workspace.tema_hr_gold.dim_date
+    source: {catalog}.tema_hr_gold.dim_date
     on: source.month_end = dt.month_end
 dimensions:
   - name: month
@@ -25,17 +31,18 @@ dimensions:
 measures:
   - name: ad_revenue
     display_name: Ad revenue (USD)
-    comment: "Total ad revenue in the period. Additive: a quarter is the sum of its months."
-    synonyms: ["revenue", "sales", "ad sales"]
+    comment: 'Total ad revenue in the period. Additive: a quarter is the sum of its months.'
+    synonyms: ['revenue', 'sales', 'ad sales']
     expr: SUM(source.ad_revenue_usd)
   - name: support_tickets
     display_name: Advertiser support tickets
     expr: SUM(source.support_tickets)
   - name: months_with_data
     display_name: Months with data
-    comment: "Number of months in the period that have data. Use it to spot partial periods: 2026-Q4 only has October."
+    comment: 'Number of months in the period that have data. Use it to spot partial periods: 2026-Q4 only has October.'
     expr: COUNT(1)
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;
 
 -- Note the names: the dimension that matches workforce_metrics must be called the same (month, quarter)
 -- and hold the same values (month-end dates, 'YYYY-Qn'), or the join below silently returns nothing.
@@ -46,9 +53,9 @@ $$;
 SELECT p.quarter, b.revenue, p.headcount,
        ROUND(b.revenue / p.headcount) AS revenue_per_employee
 FROM (SELECT quarter, MEASURE(headcount) AS headcount
-      FROM workspace.tema_hr_semantic.workforce_metrics GROUP BY ALL) p
+      FROM tema_hr_semantic.workforce_metrics GROUP BY ALL) p
 JOIN (SELECT quarter, MEASURE(ad_revenue) AS revenue, MEASURE(months_with_data) AS months
-      FROM workspace.tema_hr_semantic.business_metrics GROUP BY ALL) b USING (quarter)
+      FROM tema_hr_semantic.business_metrics GROUP BY ALL) b USING (quarter)
 WHERE b.months = 3                       -- drop 2026-Q4, which only has October
 ORDER BY quarter;
 
@@ -75,9 +82,9 @@ SELECT w.month, w.ai_headcount, w.ai_avg_salary,
        w.ai_headcount * w.ai_avg_salary AS ai_annual_base_payroll,   -- annualised base pay, not cost
        b.revenue AS monthly_revenue
 FROM (SELECT month, MEASURE(headcount) AS ai_headcount, MEASURE(average_salary) AS ai_avg_salary
-      FROM workspace.tema_hr_semantic.workforce_metrics WHERE division = 'AI' GROUP BY ALL) w
+      FROM tema_hr_semantic.workforce_metrics WHERE division = 'AI' GROUP BY ALL) w
 JOIN (SELECT month, MEASURE(ad_revenue) AS revenue
-      FROM workspace.tema_hr_semantic.business_metrics GROUP BY ALL) b USING (month)
+      FROM tema_hr_semantic.business_metrics GROUP BY ALL) b USING (month)
 ORDER BY month;
 -- Expected: April 2025, 99 AI people, about $28.0M annual base payroll, $263.3M monthly revenue.
 -- October 2026, 674 people, about $186.5M payroll (6.7x), $363.4M revenue (1.4x).
@@ -91,12 +98,12 @@ SELECT w.month, b.tickets, w.headcount,
        ROUND(b.tickets / w.headcount) AS tickets_per_employee,
        r.attrition
 FROM (SELECT month, MEASURE(headcount) AS headcount
-      FROM workspace.tema_hr_semantic.workforce_metrics
+      FROM tema_hr_semantic.workforce_metrics
       WHERE department = 'Advertiser Support' GROUP BY ALL) w
 JOIN (SELECT month, MEASURE(support_tickets) AS tickets
-      FROM workspace.tema_hr_semantic.business_metrics GROUP BY ALL) b USING (month)
+      FROM tema_hr_semantic.business_metrics GROUP BY ALL) b USING (month)
 JOIN (SELECT month, MEASURE(attrition_rate_t12m) AS attrition
-      FROM workspace.tema_hr_semantic.retention_metrics
+      FROM tema_hr_semantic.retention_metrics
       WHERE department = 'Advertiser Support' GROUP BY ALL) r USING (month)
 ORDER BY month;
 -- Expected tickets per employee: Jan 2023 183, Jan 2024 208, Jan 2025 209, Oct 2025 223, Oct 2026 271.

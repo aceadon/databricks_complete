@@ -6,9 +6,12 @@
 
 **Open it:** in your Git folder, click the file. Databricks opens `.lvdash.json` files as dashboards. If it opens as text instead, use **Dashboards > Create dashboard > ⋮ > Import dashboard from file** and pick it.
 
-**Point it at the reference:** the datasets read `workspace.tema_hr_semantic`, which is your own work. To see the reference instead, edit each dataset on the **Data** tab and change `tema_hr_semantic` to `tema_ref_semantic`. Showing both side by side is a quick visual check.
+**Point it at the reference:** the datasets read `tema_hr_semantic`, which is your own work. To see the reference instead, edit each dataset on the **Data** tab and change `tema_hr_semantic` to `tema_ref_semantic`. Showing both side by side is a quick visual check.
 
 > [!WARNING]
+> [!NOTE]
+> **Another catalog?** The datasets name `workspace.tema_hr_semantic.…`. If your catalog is different, change `workspace.` to your catalog in each dataset on the **Data** tab (or find and replace it in the JSON before importing).
+
 > **Untested in Databricks.** The JSON was written by hand to the dashboard file format, not exported from a workspace. If it won't import, or a widget shows an error, rebuild that widget from the table below (it takes about 20 minutes), then export your working version over this file.
 
 | # | Widget | Dataset (all SQL on metric views) | Shape | Expect at 5,000 people |

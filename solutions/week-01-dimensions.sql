@@ -2,7 +2,8 @@
 -- Week 1 answer key: "as of" query (step 2) and where gender belongs (step 5)
 -- Untested in Databricks.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 
 -- -------------------------------------------------------------------------------------
 -- Step 2. Department each employee was in on 2025-01-01, then people per department.

@@ -31,4 +31,4 @@ This is the **finished** version: every file is the end state of its lab. `refer
 
 ## Schema naming
 
-`tema_hr_raw` (generated source) → `tema_hr_gold` (clean star schema) → `tema_hr_semantic` (metric views) → `tema_hr_secure` (governed, masked tables). All live in your workspace catalog, usually `workspace` in Free Edition.
+`tema_hr_raw` (generated source) → `tema_hr_gold` (clean star schema) → `tema_hr_semantic` (metric views) → `tema_hr_secure` (governed, masked tables). All live in one catalog, `workspace` by default (the Free Edition name). To use another, see [Choose your catalog](../README.md#choose-your-catalog).

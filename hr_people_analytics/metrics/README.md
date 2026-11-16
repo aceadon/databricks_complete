@@ -12,4 +12,4 @@
 | [`business_metrics.sql`](business_metrics.sql) | 11 | Ad revenue, support tickets, months with data |
 | [`checks/`](checks/) | 3–11 | Truth queries and checkpoint queries with the expected numbers |
 
-Each file holds one `CREATE OR REPLACE VIEW … WITH METRICS LANGUAGE YAML` statement and nothing else, so `databricks.yml` can deploy it (Week 10). Every measure has an entry in [docs/metric-definitions.md](../../docs/metric-definitions.md); if the two disagree, the definition wins and the YAML gets fixed.
+Each file creates one metric view and nothing else, so `databricks.yml` can deploy it (Week 10). It sets the catalog in its first line (`tema_catalog`), then builds the `CREATE OR REPLACE VIEW … WITH METRICS LANGUAGE YAML` statement as text and runs it with `EXECUTE IMMEDIATE`, because the YAML needs full three-part names. See [Choose your catalog](../../README.md#choose-your-catalog). Every measure has an entry in [docs/metric-definitions.md](../../docs/metric-definitions.md); if the two disagree, the definition wins and the YAML gets fixed.
