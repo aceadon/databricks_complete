@@ -4,7 +4,8 @@
 -- Fictional monthly ad revenue and advertiser support tickets, sized for a 70,000-person company.
 -- Checkpoint: 46 rows (Jan 2023 to Oct 2026).
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 CREATE OR REPLACE TABLE fact_business_monthly
@@ -21,3 +22,4 @@ ALTER TABLE fact_business_monthly ALTER COLUMN month_end       COMMENT 'Last day
 ALTER TABLE fact_business_monthly ALTER COLUMN ad_revenue_usd  COMMENT 'Total ad revenue booked in the month, USD. Synthetic.';
 ALTER TABLE fact_business_monthly ALTER COLUMN support_tickets COMMENT 'Advertiser support tickets opened in the month. Synthetic.';
 ALTER TABLE fact_business_monthly SET TAGS ('domain' = 'business');
+ALTER TABLE fact_business_monthly SET TBLPROPERTIES ('synthetic_data' = 'true');

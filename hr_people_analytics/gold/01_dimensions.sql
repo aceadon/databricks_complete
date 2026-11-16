@@ -4,7 +4,8 @@
 -- Creates 7 tables in tema_hr_gold. Sensitive personal fields live only in dim_employee_sensitive.
 -- Checkpoint at 5,000 people: dim_employee 7,207 · dim_employee_sensitive 7,207 · dim_manager 592 · dim_date 48
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 CREATE SCHEMA IF NOT EXISTS tema_hr_gold
   COMMENT 'Tema (fictional) people analytics star schema. Clean, documented tables for metrics, dashboards and Genie. Synthetic data only.';
 USE SCHEMA tema_hr_gold;

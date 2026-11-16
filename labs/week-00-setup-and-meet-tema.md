@@ -17,7 +17,7 @@ Have a working Databricks workspace connected to this repo, with Tema's HR data 
 
 1. Sign up for [Databricks Free Edition](https://docs.databricks.com/aws/en/getting-started/free-edition).
 2. Take a ten-minute tour of the left sidebar: **Catalog** (Catalog Explorer), **SQL Editor**, **Workspace**, **Dashboards**, **Genie**. Don't build anything yet.
-3. In **Catalog**, find your catalog. In Free Edition it's usually called `workspace`. Every sheet assumes that name; if yours differs, note it now.
+3. In **Catalog**, find your catalog. In Free Edition it's usually called `workspace`, and every sheet defaults to that name. If yours differs (for example a catalog you were given in a shared company workspace), note it now and see [Choose your catalog](../README.md#choose-your-catalog).
 
 ### 2. Connect this repo
 
@@ -29,7 +29,7 @@ Have a working Databricks workspace connected to this repo, with Tema's HR data 
 1. Open `hr_people_analytics/00_generate_hr_data.py`. Databricks shows it as a notebook.
 2. Attach it to **Serverless** compute.
 3. Run the first cell once so the widgets appear at the top. Set:
-   - `catalog`: `workspace`
+   - `catalog`: `workspace` (or your own catalog)
    - `schema`: `tema_hr_raw`
    - `target_headcount`: `5000`
 4. **Run all.** The last cell prints a row count for each table.
@@ -45,7 +45,8 @@ Have a working Databricks workspace connected to this repo, with Tema's HR data 
 Open a new query in the **SQL Editor** and run:
 
 ```sql
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 SHOW TABLES IN tema_hr_raw;
 
 SELECT * FROM tema_hr_raw.employees LIMIT 20;

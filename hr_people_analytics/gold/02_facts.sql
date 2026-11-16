@@ -6,7 +6,8 @@
 -- fact_requisitions 2,948 · fact_engagement 23,252 · fact_absences 74,392 · fact_equity_grants 8,276
 -- Rebuilding any table here wipes its keys, comments and tags: rerun 03 and 04 afterwards.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 -- One row per employee per month they were employed. The workhorse for headcount and attrition.

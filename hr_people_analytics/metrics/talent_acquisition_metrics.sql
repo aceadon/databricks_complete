@@ -4,17 +4,23 @@
 -- ("AI" is a business concept worth naming). Since May 2025, filled roles: AI median 67 days vs 41,
 -- offer acceptance about 70% vs 84%. Checks: metrics/checks/catalog_checks.sql
 -- =====================================================================================
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.talent_acquisition_metrics
-WITH METRICS LANGUAGE YAML AS $$
+
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.talent_acquisition_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema hiring funnel, one row per requisition. Time to fill counts calendar days from opened to filled."
-source: workspace.tema_hr_gold.fact_requisitions
+comment: 'Tema hiring funnel, one row per requisition. Time to fill counts calendar days from opened to filled.'
+source: {catalog}.tema_hr_gold.fact_requisitions
 joins:
   - name: dept
-    source: workspace.tema_hr_gold.dim_department
+    source: {catalog}.tema_hr_gold.dim_department
     on: source.department_id = dept.department_id
   - name: job
-    source: workspace.tema_hr_gold.dim_job
+    source: {catalog}.tema_hr_gold.dim_job
     on: source.job_id = job.job_id
 dimensions:
   - name: opened_month
@@ -44,19 +50,20 @@ measures:
     expr: COUNT(1)
   - name: open_requisitions
     display_name: Open requisitions
-    comment: "Requisitions with status Open. Not a time series: it is today's open roles for whatever slice you pick."
-    synonyms: ["open roles", "open reqs", "vacancies"]
+    comment: 'Requisitions with status Open. Not a time series: it is today''s open roles for whatever slice you pick.'
+    synonyms: ['open roles', 'open reqs', 'vacancies']
     expr: COUNT(1) FILTER (WHERE source.status = 'Open')
   - name: median_time_to_fill_days
     display_name: Median time to fill (days)
-    comment: "Median calendar days from opened to filled, over filled requisitions. Open and cancelled roles have no time to fill and are left out."
-    synonyms: ["time to hire", "days to fill", "time to fill"]
+    comment: 'Median calendar days from opened to filled, over filled requisitions. Open and cancelled roles have no time to fill and are left out.'
+    synonyms: ['time to hire', 'days to fill', 'time to fill']
     expr: MEDIAN(source.days_to_fill)
   - name: offer_acceptance_rate
     display_name: Offer acceptance rate
-    comment: "Offers accepted divided by offers extended."
+    comment: 'Offers accepted divided by offers extended.'
     expr: try_divide(SUM(source.offers_accepted), SUM(source.offers_extended))
   - name: applicants_per_hire
     display_name: Applicants per hire
     expr: try_divide(SUM(source.applicants) FILTER (WHERE source.status = 'Filled'), COUNT(1) FILTER (WHERE source.status = 'Filled'))
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;

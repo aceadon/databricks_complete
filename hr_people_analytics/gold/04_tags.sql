@@ -10,7 +10,8 @@
 -- Week 8 ABAC policies match on hr_sensitivity = 'restricted', so only put 'restricted' on
 -- columns everyone outside an HRBP's scope should have masked.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 -- -------------------------------------------------------------------------------------
@@ -73,21 +74,21 @@ ALTER TABLE fact_engagement ALTER COLUMN enps_score SET TAGS ('hr_sensitivity' =
 -- Checks
 -- -------------------------------------------------------------------------------------
 -- Every table tagged domain = people (expect 13 rows)
-SELECT table_name, tag_name, tag_value FROM workspace.information_schema.table_tags
+SELECT table_name, tag_name, tag_value FROM information_schema.table_tags
 WHERE schema_name = 'tema_hr_gold' AND tag_name = 'domain' ORDER BY table_name;
 
 -- Tables missing the domain tag (expect 0 rows)
-SELECT t.table_name FROM workspace.information_schema.tables t
-LEFT ANTI JOIN workspace.information_schema.table_tags g
+SELECT t.table_name FROM information_schema.tables t
+LEFT ANTI JOIN information_schema.table_tags g
   ON g.schema_name = t.table_schema AND g.table_name = t.table_name AND g.tag_name = 'domain'
 WHERE t.table_schema = 'tema_hr_gold';
 
 -- Restricted columns (expect 8, or 9 with absence_type)
-SELECT table_name, column_name, tag_value FROM workspace.information_schema.column_tags
+SELECT table_name, column_name, tag_value FROM information_schema.column_tags
 WHERE schema_name = 'tema_hr_gold' AND tag_name = 'hr_sensitivity' AND tag_value = 'restricted'
 ORDER BY table_name, column_name;
 
 -- Everything tagged, one row per column
 SELECT table_name, column_name, collect_list(tag_name || '=' || tag_value) AS tags
-FROM workspace.information_schema.column_tags
+FROM information_schema.column_tags
 WHERE schema_name = 'tema_hr_gold' GROUP BY ALL ORDER BY table_name, column_name;

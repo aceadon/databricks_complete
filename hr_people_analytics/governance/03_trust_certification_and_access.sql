@@ -5,24 +5,29 @@
 -- Untested in Databricks. The reference build runs this file as OPTIONAL: Free Edition is
 -- single-user and may refuse grants to `account users` or the system certification tag.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 
 -- -------------------------------------------------------------------------------------
 -- Step 2. Aggregate-only access: a broad group gets metric views, never the tables underneath.
+-- In a shared company workspace, swap `account users` (everyone) for a test group before running this.
 -- -------------------------------------------------------------------------------------
-GRANT USE CATALOG ON CATALOG workspace TO `account users`;
-GRANT USE SCHEMA ON SCHEMA workspace.tema_hr_semantic TO `account users`;
-GRANT SELECT ON VIEW workspace.tema_hr_semantic.workforce_metrics TO `account users`;
-GRANT SELECT ON VIEW workspace.tema_hr_semantic.retention_metrics TO `account users`;
-GRANT SELECT ON VIEW workspace.tema_hr_semantic.experience_metrics TO `account users`;
-GRANT SELECT ON VIEW workspace.tema_hr_semantic.talent_acquisition_metrics TO `account users`;
-GRANT SELECT ON VIEW workspace.tema_hr_semantic.pay_by_level_safe TO `account users`;
+-- The catalog name comes from tema_catalog, and GRANT can't take a variable, so build it as text and run it
+DECLARE OR REPLACE VARIABLE grant_sql STRING;
+SET VAR grant_sql = 'GRANT USE CATALOG ON CATALOG ' || tema_catalog || ' TO `account users`';
+EXECUTE IMMEDIATE grant_sql;
+GRANT USE SCHEMA ON SCHEMA tema_hr_semantic TO `account users`;
+GRANT SELECT ON VIEW tema_hr_semantic.workforce_metrics TO `account users`;
+GRANT SELECT ON VIEW tema_hr_semantic.retention_metrics TO `account users`;
+GRANT SELECT ON VIEW tema_hr_semantic.experience_metrics TO `account users`;
+GRANT SELECT ON VIEW tema_hr_semantic.talent_acquisition_metrics TO `account users`;
+GRANT SELECT ON VIEW tema_hr_semantic.pay_by_level_safe TO `account users`;
 -- Deliberately NOT granted: anything in tema_hr_gold, tema_hr_raw or tema_hr_secure, and pay_metrics
 -- (it has the unsuppressed avg_compa_ratio and average_salary; a metric view grant covers every measure).
 
 -- Proof from grants (the Week 9 checkpoint)
-SHOW GRANTS ON SCHEMA workspace.tema_hr_semantic;
-SHOW GRANTS ON SCHEMA workspace.tema_hr_gold;      -- expect no `account users` rows
+SHOW GRANTS ON SCHEMA tema_hr_semantic;
+SHOW GRANTS ON SCHEMA tema_hr_gold;      -- expect no `account users` rows
 
 -- What the docs say (write this in your governance doc): a metric view runs its source query with the
 -- view owner's rights, like a standard view, so readers need SELECT on the metric view only, not on
@@ -34,13 +39,13 @@ SHOW GRANTS ON SCHEMA workspace.tema_hr_gold;      -- expect no `account users` 
 -- Certification is a system tag in current releases. If SET TAGS refuses the key, use the
 -- Certified / Deprecated badges in Catalog Explorer instead and note it.
 -- -------------------------------------------------------------------------------------
-ALTER VIEW workspace.tema_hr_semantic.workforce_metrics          SET TAGS ('system.certification_status' = 'certified');
-ALTER VIEW workspace.tema_hr_semantic.retention_metrics          SET TAGS ('system.certification_status' = 'certified');
-ALTER VIEW workspace.tema_hr_semantic.talent_acquisition_metrics SET TAGS ('system.certification_status' = 'certified');
-ALTER VIEW workspace.tema_hr_semantic.experience_metrics         SET TAGS ('system.certification_status' = 'certified');
-ALTER VIEW workspace.tema_hr_semantic.pay_metrics                SET TAGS ('system.certification_status' = 'certified');
-ALTER TABLE workspace.tema_hr_gold.fact_headcount_monthly        SET TAGS ('system.certification_status' = 'certified');
-ALTER TABLE workspace.tema_hr_gold.dim_employee                  SET TAGS ('system.certification_status' = 'certified');
-ALTER VIEW workspace.tema_hr_semantic.v_headcount_naive          SET TAGS ('system.certification_status' = 'deprecated');
+ALTER VIEW tema_hr_semantic.workforce_metrics          SET TAGS ('system.certification_status' = 'certified');
+ALTER VIEW tema_hr_semantic.retention_metrics          SET TAGS ('system.certification_status' = 'certified');
+ALTER VIEW tema_hr_semantic.talent_acquisition_metrics SET TAGS ('system.certification_status' = 'certified');
+ALTER VIEW tema_hr_semantic.experience_metrics         SET TAGS ('system.certification_status' = 'certified');
+ALTER VIEW tema_hr_semantic.pay_metrics                SET TAGS ('system.certification_status' = 'certified');
+ALTER TABLE tema_hr_gold.fact_headcount_monthly        SET TAGS ('system.certification_status' = 'certified');
+ALTER TABLE tema_hr_gold.dim_employee                  SET TAGS ('system.certification_status' = 'certified');
+ALTER VIEW tema_hr_semantic.v_headcount_naive          SET TAGS ('system.certification_status' = 'deprecated');
 
 -- Step 5 (adoption and access dashboard queries) is in 04_adoption_and_access_queries.sql.

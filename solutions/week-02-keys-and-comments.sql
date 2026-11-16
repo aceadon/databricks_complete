@@ -4,7 +4,8 @@
 -- Re-running any CREATE OR REPLACE TABLE wipes that table's constraints AND comments,
 -- so run this whole file again after every rebuild.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 -- -------------------------------------------------------------------------------------
@@ -67,7 +68,7 @@ SELECT f.job_id FROM fact_headcount_monthly f LEFT ANTI JOIN dim_job j ON j.job_
 
 -- See what you declared
 SELECT table_name, constraint_name, constraint_type
-FROM workspace.information_schema.table_constraints
+FROM information_schema.table_constraints
 WHERE table_schema = 'tema_hr_gold'
 ORDER BY table_name, constraint_type DESC;
 
@@ -254,5 +255,5 @@ ALTER TABLE fact_equity_grants ALTER COLUMN shares          COMMENT 'Number of s
 ALTER TABLE fact_equity_grants ALTER COLUMN vesting_years   COMMENT 'Years over which the grant vests. Always 4 at Tema.';
 
 -- Checkpoint: columns with no comment (expect 0 rows)
-SELECT table_name, column_name FROM workspace.information_schema.columns
+SELECT table_name, column_name FROM information_schema.columns
 WHERE table_schema = 'tema_hr_gold' AND (comment IS NULL OR comment = '');

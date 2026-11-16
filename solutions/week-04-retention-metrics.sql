@@ -5,6 +5,9 @@
 -- Untested in Databricks.
 -- =====================================================================================
 
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+
 -- -------------------------------------------------------------------------------------
 -- Step 4. Same question for October 2025
 -- -------------------------------------------------------------------------------------
@@ -12,7 +15,7 @@ SELECT division,
        MEASURE(attrition_rate_t12m)           AS attrition,
        MEASURE(voluntary_attrition_rate_t12m) AS voluntary,
        MEASURE(regretted_attrition_rate_t12m) AS regretted
-FROM workspace.tema_hr_semantic.retention_metrics
+FROM tema_hr_semantic.retention_metrics
 WHERE month = '2025-10-31'
 GROUP BY ALL ORDER BY attrition DESC;
 
@@ -63,7 +66,7 @@ GROUP BY ALL ORDER BY attrition DESC;
 
 -- Check against the metric view: expect 21.3% for Oct 2025 and 24.0% for Oct 2026
 SELECT month, MEASURE(first_year_attrition_rate_t12m) AS first_year_attrition
-FROM workspace.tema_hr_semantic.retention_metrics
+FROM tema_hr_semantic.retention_metrics
 WHERE month IN ('2025-10-31', '2026-10-31')
 GROUP BY ALL ORDER BY month;
 
@@ -72,7 +75,7 @@ WITH monthly AS (
   SELECT snapshot_month,
          COUNT_IF(is_termination_in_month AND is_first_year) AS first_year_leavers,
          COUNT_IF(is_active_month_end AND is_first_year)     AS first_year_headcount
-  FROM workspace.tema_hr_gold.fact_headcount_monthly
+  FROM tema_hr_gold.fact_headcount_monthly
   GROUP BY ALL
 )
 SELECT snapshot_month,

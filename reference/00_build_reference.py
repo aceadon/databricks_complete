@@ -94,26 +94,30 @@ print(f"tema_hr_raw has {people:,} employees ever employed" + (" (the 5,000-pers
 # COMMAND ----------
 
 SKIP_PREFIXES = ("SELECT", "WITH", "SHOW", "DESCRIBE")   # checks inside build files; 01_check_my_work runs the checks
-SAFE_MEASURE = re.compile(r"\n  # Week 9: the small-group rule.*?(?=\n\$\$)", re.S)
+SAFE_MEASURE = re.compile(r"\n  # Week 9: the small-group rule.*?(?=\n\")", re.S)   # up to the end of the YAML string
 
 results = []
 
 def run_file(week, path, optional):
     text = open(path).read()
     ok = failed = 0
+    last_set = None   # metric view files build the CREATE in a SET VAR, then run it with EXECUTE IMMEDIATE
     for stmt in split_sql(text):
         if stmt.lstrip("( \n").upper().startswith(SKIP_PREFIXES):
             continue
         sql = retarget(stmt, CATALOG, PREFIX)
+        if sql.upper().startswith("SET VAR"):
+            last_set = sql
         try:
             spark.sql(sql)
             ok += 1
         except Exception as e:
             msg = str(e).split("\n")[0][:300]
             # pay_metrics: if the Week 9 CASE-around-aggregates measure is refused, build without it (lab fallback)
-            if "pay_metrics" in path and SAFE_MEASURE.search(sql):
+            if "pay_metrics" in path and last_set and SAFE_MEASURE.search(last_set):
                 try:
-                    spark.sql(SAFE_MEASURE.sub("", sql))
+                    spark.sql(SAFE_MEASURE.sub("", last_set))
+                    spark.sql(sql)
                     ok += 1
                     results.append((week, path, "warning", "avg_compa_ratio_safe refused; built pay_metrics without it. Use pay_by_level_safe.", msg))
                     continue

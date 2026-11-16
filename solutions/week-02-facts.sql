@@ -2,7 +2,8 @@
 -- Week 2 answer key: fact_absences and fact_equity_grants (step 1)
 -- Same as the hidden answer in the lab sheet, plus checks. Untested in Databricks.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 -- One row per absence, with the employee's team at the end of the month the absence started.

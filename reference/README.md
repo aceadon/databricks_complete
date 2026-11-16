@@ -9,7 +9,7 @@
 
 ## How the build stays out of your way
 
-The finished `.sql` files name the same schemas as the labs (`workspace.tema_hr_gold`, `tema_hr_semantic`, `tema_hr_secure`), so they read exactly like what you wrote. The build notebook rewrites those names as it runs, so the reference lands in `tema_ref_gold`, `tema_ref_semantic` and `tema_ref_secure`. Both builds read the same `tema_hr_raw` source tables, which nothing here changes.
+The finished `.sql` files name the same schemas as the labs (`tema_hr_gold`, `tema_hr_semantic`, `tema_hr_secure`), so they read exactly like what you wrote. The build notebook rewrites those names as it runs, so the reference lands in `tema_ref_gold`, `tema_ref_semantic` and `tema_ref_secure`, in the catalog you set in its `catalog` widget (it changes each file's `tema_catalog` line for you). Both builds read the same `tema_hr_raw` source tables, which nothing here changes.
 
 To use the reference *as* your build (for example to catch up and start at week 8), set `reference_prefix` to `tema_hr`. That overwrites your own gold, semantic and secure schemas, so commit your work first.
 

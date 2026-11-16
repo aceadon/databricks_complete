@@ -55,6 +55,8 @@ targets:
     mode: development
 ```
 
+The SQL files choose their catalog themselves, in their `tema_catalog` line, so the `catalog` variable here only records where the bundle deploys. If you deploy to another catalog, change that line in the files too (see [Choose your catalog](../README.md#choose-your-catalog)).
+
 **Your turn.** Add a `warehouse_id` variable (find your SQL warehouse ID under **SQL Warehouses**), and add tasks for your other metric view files.
 
 > [!WARNING]

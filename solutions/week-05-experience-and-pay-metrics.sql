@@ -5,17 +5,23 @@
 -- Save each view in its own file in hr_people_analytics/metrics/. Untested in Databricks.
 -- =====================================================================================
 
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+
 -- -------------------------------------------------------------------------------------
 -- Step 2. experience_metrics (hr_people_analytics/metrics/experience_metrics.sql)
 -- -------------------------------------------------------------------------------------
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.experience_metrics
-WITH METRICS LANGUAGE YAML AS $$
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.experience_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema engagement survey results, twice a year (May and November). One row per response. Report aggregates only."
-source: workspace.tema_hr_gold.fact_engagement
+comment: 'Tema engagement survey results, twice a year (May and November). One row per response. Report aggregates only.'
+source: {catalog}.tema_hr_gold.fact_engagement
 joins:
   - name: dept
-    source: workspace.tema_hr_gold.dim_department
+    source: {catalog}.tema_hr_gold.dim_department
     on: source.department_id = dept.department_id
 dimensions:
   - name: survey_cycle
@@ -33,18 +39,19 @@ measures:
     expr: COUNT(1)
   - name: enps
     display_name: eNPS
-    comment: "% promoters (9-10) minus % detractors (0-6). Ranges from -100 to +100. Never average enps_score."
-    synonyms: ["employee net promoter score", "net promoter"]
+    comment: '% promoters (9-10) minus % detractors (0-6). Ranges from -100 to +100. Never average enps_score.'
+    synonyms: ['employee net promoter score', 'net promoter']
     expr: 100.0 * (COUNT(1) FILTER (WHERE source.enps_score >= 9) - COUNT(1) FILTER (WHERE source.enps_score <= 6)) / COUNT(1)
   - name: engagement_score
     display_name: Engagement score
-    comment: "Average engagement index, 1 (low) to 5 (high)."
+    comment: 'Average engagement index, 1 (low) to 5 (high).'
     expr: AVG(source.engagement_score)
   - name: manager_score
     display_name: Manager score
-    comment: "Average rating of the direct manager, 1 to 5."
+    comment: 'Average rating of the direct manager, 1 to 5.'
     expr: AVG(source.manager_score)
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;
 
 -- Check: eNPS, responses and engagement by cycle (5,000 people)
 --   2023-H1  -7.1  3,205  3.45   <- after the January 2023 layoffs
@@ -55,7 +62,7 @@ $$;
 --   2025-H2 +12.2  3,435  3.62
 --   2026-H1 +16.7  3,743  3.66
 SELECT survey_cycle, MEASURE(enps), MEASURE(responses), MEASURE(engagement_score)
-FROM workspace.tema_hr_semantic.experience_metrics
+FROM tema_hr_semantic.experience_metrics
 GROUP BY ALL ORDER BY survey_cycle;
 
 -- Common mistakes:
@@ -68,23 +75,26 @@ GROUP BY ALL ORDER BY survey_cycle;
 -- Step 3. pay_metrics (hr_people_analytics/metrics/pay_metrics.sql)
 -- Includes a headcount measure and a division dimension, which Week 9 needs.
 -- -------------------------------------------------------------------------------------
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.pay_metrics
-WITH METRICS LANGUAGE YAML AS $$
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.pay_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema pay positioning. Month-end snapshot of active employees; all measures are semi-additive over time. Restricted: pay data."
-source: workspace.tema_hr_gold.fact_headcount_monthly
+comment: 'Tema pay positioning. Month-end snapshot of active employees; all measures are semi-additive over time. Restricted: pay data.'
+source: {catalog}.tema_hr_gold.fact_headcount_monthly
 joins:
   - name: dt
-    source: workspace.tema_hr_gold.dim_date
+    source: {catalog}.tema_hr_gold.dim_date
     on: source.snapshot_month = dt.month_end
   - name: dept
-    source: workspace.tema_hr_gold.dim_department
+    source: {catalog}.tema_hr_gold.dim_department
     on: source.department_id = dept.department_id
   - name: job
-    source: workspace.tema_hr_gold.dim_job
+    source: {catalog}.tema_hr_gold.dim_job
     on: source.job_id = job.job_id
   - name: loc
-    source: workspace.tema_hr_gold.dim_location
+    source: {catalog}.tema_hr_gold.dim_location
     on: source.location_id = loc.location_id
 dimensions:
   - name: month
@@ -106,7 +116,7 @@ dimensions:
 measures:
   - name: headcount
     display_name: Headcount
-    comment: "People employed at period end. Shown next to pay so small groups are visible."
+    comment: 'People employed at period end. Shown next to pay so small groups are visible.'
     expr: COUNT(DISTINCT source.employee_id) FILTER (WHERE source.is_active_month_end)
     window:
       - order: month
@@ -114,8 +124,8 @@ measures:
         semiadditive: last
   - name: avg_compa_ratio
     display_name: Average compa-ratio
-    comment: "Base salary / (band midpoint x location pay factor), averaged over people active at period end. 1.00 = paid at midpoint."
-    synonyms: ["compa ratio", "pay vs midpoint"]
+    comment: 'Base salary / (band midpoint x location pay factor), averaged over people active at period end. 1.00 = paid at midpoint.'
+    synonyms: ['compa ratio', 'pay vs midpoint']
     expr: AVG(source.annual_base_salary / (job.salary_band_mid * loc.location_pay_factor)) FILTER (WHERE source.is_active_month_end)
     window:
       - order: month
@@ -128,11 +138,12 @@ measures:
       - order: month
         range: current
         semiadditive: last
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;
 
 -- "Which job levels have the lowest average compa-ratio?" for October 2026
 SELECT job_level, MEASURE(avg_compa_ratio) AS avg_compa_ratio, MEASURE(headcount) AS headcount
-FROM workspace.tema_hr_semantic.pay_metrics
+FROM tema_hr_semantic.pay_metrics
 WHERE month = '2026-10-31'
 GROUP BY ALL ORDER BY avg_compa_ratio;
 
@@ -161,8 +172,8 @@ SELECT month, department, ROUND(AVG(salary / dept_avg), 3) AS salary_vs_departme
 FROM (
   SELECT f.snapshot_month AS month, d.department_name AS department, f.annual_base_salary AS salary,
          AVG(f.annual_base_salary) OVER (PARTITION BY f.snapshot_month, f.department_id) AS dept_avg
-  FROM workspace.tema_hr_gold.fact_headcount_monthly f
-  JOIN workspace.tema_hr_gold.dim_department d ON d.department_id = f.department_id
+  FROM tema_hr_gold.fact_headcount_monthly f
+  JOIN tema_hr_gold.dim_department d ON d.department_id = f.department_id
   WHERE f.is_active_month_end
 )
 WHERE month = '2026-10-31'

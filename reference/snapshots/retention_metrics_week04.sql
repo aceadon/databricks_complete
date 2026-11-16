@@ -4,23 +4,29 @@
 -- the Week 4 checkpoint: 13.1% for October 2026. From Week 10 on, the build uses
 -- hr_people_analytics/metrics/retention_metrics.sql, which excludes part-time employees (12.9%).
 -- =====================================================================================
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.retention_metrics
-WITH METRICS LANGUAGE YAML AS $$
+
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.retention_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema attrition. Rates divide leavers by average month-end headcount over the same trailing 12 months."
-source: workspace.tema_hr_gold.fact_headcount_monthly
+comment: 'Tema attrition. Rates divide leavers by average month-end headcount over the same trailing 12 months.'
+source: {catalog}.tema_hr_gold.fact_headcount_monthly
 joins:
   - name: dt
-    source: workspace.tema_hr_gold.dim_date
+    source: {catalog}.tema_hr_gold.dim_date
     on: source.snapshot_month = dt.month_end
   - name: dept
-    source: workspace.tema_hr_gold.dim_department
+    source: {catalog}.tema_hr_gold.dim_department
     on: source.department_id = dept.department_id
   - name: job
-    source: workspace.tema_hr_gold.dim_job
+    source: {catalog}.tema_hr_gold.dim_job
     on: source.job_id = job.job_id
   - name: loc
-    source: workspace.tema_hr_gold.dim_location
+    source: {catalog}.tema_hr_gold.dim_location
     on: source.location_id = loc.location_id
 dimensions:
   - name: month
@@ -80,22 +86,22 @@ measures:
   # The rates people actually ask for
   - name: attrition_rate_t12m
     display_name: Attrition rate (trailing 12 months)
-    comment: "All leavers in the 12 months ending with the period, divided by average month-end headcount over those months. The default meaning of 'attrition' at Tema."
-    synonyms: ["attrition", "turnover", "attrition rate", "churn"]
+    comment: 'All leavers in the 12 months ending with the period, divided by average month-end headcount over those months. The default meaning of ''attrition'' at Tema.'
+    synonyms: ['attrition', 'turnover', 'attrition rate', 'churn']
     format:
       type: percentage
     expr: try_divide(MEASURE(leavers_t12m), MEASURE(avg_headcount_t12m))
   - name: voluntary_attrition_rate_t12m
     display_name: Voluntary attrition rate (trailing 12 months)
-    comment: "People who resigned in the trailing 12 months, divided by the same average headcount as attrition_rate_t12m."
-    synonyms: ["voluntary turnover", "resignations rate"]
+    comment: 'People who resigned in the trailing 12 months, divided by the same average headcount as attrition_rate_t12m.'
+    synonyms: ['voluntary turnover', 'resignations rate']
     expr: try_divide(MEASURE(voluntary_leavers_t12m), MEASURE(avg_headcount_t12m))
   - name: regretted_attrition_rate_t12m
     display_name: Regretted attrition rate (trailing 12 months)
-    comment: "Leavers the company wanted to keep, divided by the same average headcount as attrition_rate_t12m."
-    synonyms: ["regretted turnover", "regretted losses"]
+    comment: 'Leavers the company wanted to keep, divided by the same average headcount as attrition_rate_t12m.'
+    synonyms: ['regretted turnover', 'regretted losses']
     expr: try_divide(MEASURE(regretted_leavers_t12m), MEASURE(avg_headcount_t12m))
-  # Week 4 "Your turn": people who leave before their one-year mark
+  # Week 4 'Your turn': people who leave before their one-year mark
   - name: first_year_leavers_t12m
     display_name: First-year leavers (trailing 12 months)
     expr: COUNT(1) FILTER (WHERE source.is_termination_in_month AND source.is_first_year)
@@ -112,14 +118,15 @@ measures:
         semiadditive: last
   - name: first_year_attrition_rate_t12m
     display_name: First-year attrition rate (trailing 12 months)
-    comment: "Leavers with under 12 months' tenure in the trailing 12 months, divided by the average month-end headcount of people with under 12 months' tenure."
-    synonyms: ["new hire attrition", "early attrition", "first year turnover"]
+    comment: 'Leavers with under 12 months'' tenure in the trailing 12 months, divided by the average month-end headcount of people with under 12 months'' tenure.'
+    synonyms: ['new hire attrition', 'early attrition', 'first year turnover']
     format:
       type: percentage
     expr: try_divide(MEASURE(first_year_leavers_t12m), MEASURE(first_year_avg_headcount_t12m))
   # Simple monthly flow, additive over time. Counts everyone, part-time included: it answers
-  # "how many people left", not "what is our attrition rate".
+  # 'how many people left', not 'what is our attrition rate'.
   - name: leavers
     display_name: Leavers
     expr: COUNT(1) FILTER (WHERE source.is_termination_in_month)
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;

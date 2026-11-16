@@ -1,6 +1,8 @@
 -- =====================================================================================
 -- People Analytics Assistant · trusted example SQL (Week 7, step 3)
 -- Add each as an example query with the question as its title.
+-- Genie runs these without a current catalog, so they keep full names. If your catalog isn't
+-- `workspace`, change `workspace.` as you paste them (create_genie_spaces.py --catalog does it for you).
 -- =====================================================================================
 
 -- How many people did we have at the end of each quarter?

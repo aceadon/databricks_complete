@@ -4,7 +4,7 @@
 # MAGIC Shared by `00_build_reference` and `01_check_my_work` (they `%run` this notebook). Nothing to run here on its own.
 # MAGIC
 # MAGIC - `split_sql(text)` splits a `.sql` file into statements, respecting quotes, comments and `$$ ... $$` metric view YAML.
-# MAGIC - `retarget(sql, catalog, prefix)` rewrites `workspace.` and the `tema_hr_gold / tema_hr_semantic / tema_hr_secure`
+# MAGIC - `retarget(sql, catalog, prefix)` sets the files' `tema_catalog` default (and any leftover `workspace.`) to your catalog, and renames the `tema_hr_gold / tema_hr_semantic / tema_hr_secure`
 # MAGIC   schema names, so the reference can be built next to your own work without touching it.
 # MAGIC   `tema_hr_raw` is never renamed: the generated source data is shared.
 
@@ -67,6 +67,7 @@ def retarget(sql: str, catalog: str = "workspace", prefix: str = "tema_hr") -> s
     if prefix != "tema_hr":
         sql = re.sub(r"\btema_hr_(" + "|".join(RENAMED_SCHEMAS) + r")\b", prefix + r"_\1", sql)
     if catalog != "workspace":
+        sql = re.sub(r"(VARIABLE\s+tema_catalog\s+STRING\s+DEFAULT\s+)'workspace'", r"\1'" + catalog + "'", sql)
         sql = re.sub(r"\bworkspace(?=\.)", catalog, sql)
         sql = re.sub(r"(?i)(CATALOG\s+)workspace\b", r"\1" + catalog, sql)
     return sql

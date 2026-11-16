@@ -4,7 +4,9 @@
 #   databricks bundle validate --var="warehouse_id=<id>"
 #   databricks bundle deploy   --var="warehouse_id=<id>"
 #   databricks bundle run deploy_metric_views --var="warehouse_id=<id>"
-# The SQL files name workspace.tema_hr_semantic, so this deploys into YOUR schemas, not tema_ref_*.
+# The SQL files deploy into YOUR tema_hr_semantic schema (not tema_ref_*), in the catalog set by the
+# tema_catalog line at the top of each file. The catalog variable below only records it: if you deploy
+# somewhere other than `workspace`, change that line in the files too (README, "Choose your catalog").
 # The gold tables must exist first (run them, or reference/00_build_reference with reference_prefix = tema_hr).
 # Untested: run `databricks bundle validate` and fix what it reports. If Free Edition won't run SQL file
 # tasks on a warehouse, swap them for one notebook task on serverless that runs reference/00_build_reference.

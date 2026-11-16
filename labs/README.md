@@ -56,4 +56,4 @@ Checkpoints quote numbers from Tema generated at **5,000 people** with the defau
 
 - Everything is synthetic. Never load real employee data into a personal or trial workspace.
 - Work on a branch per week and merge into `main` with a pull request (see the [repo conventions](../README.md#conventions)).
-- Catalog is assumed to be `workspace` (the Free Edition default). If yours is different, change it at the top of each script.
+- Catalog defaults to `workspace` (the Free Edition default). Every SQL file and lab block that needs it starts with `DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';` followed by `USE CATALOG IDENTIFIER(tema_catalog);`. If your catalog is different, change `'workspace'` on that line; see [Choose your catalog](../README.md#choose-your-catalog). Blocks without that line use two-part names (`tema_hr_gold.dim_employee`) and assume you've already run it in the same SQL editor tab or notebook.

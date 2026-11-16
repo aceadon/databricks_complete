@@ -3,7 +3,8 @@
 -- labs/week-03, step 1. The naive view exists to show the problem (2025-Q2 "headcount" = 12,429)
 -- and is marked deprecated in Week 9. Never point a dashboard or Genie at it.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 CREATE SCHEMA IF NOT EXISTS tema_hr_semantic
   COMMENT 'Tema (fictional) people metrics: certified definitions for dashboards, Genie and BI tools.';
 

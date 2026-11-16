@@ -5,12 +5,15 @@
 -- Assumes pay_metrics from the Week 5 key (it has headcount and division). Untested in Databricks.
 -- =====================================================================================
 
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+
 -- -------------------------------------------------------------------------------------
 -- Step 1. See the problem: 68 division x level groups in Oct 2026, 13 of them under 5 people
 -- (every VP and SVP group, E1 and E2, and Trust & Safety IC6).
 -- -------------------------------------------------------------------------------------
 SELECT division, job_level, MEASURE(headcount) AS headcount, MEASURE(avg_compa_ratio) AS avg_compa_ratio
-FROM workspace.tema_hr_semantic.pay_metrics
+FROM tema_hr_semantic.pay_metrics
 WHERE month = '2026-10-31'
 GROUP BY ALL HAVING MEASURE(headcount) < 5
 ORDER BY division, job_level;
@@ -19,7 +22,7 @@ ORDER BY division, job_level;
 -- -------------------------------------------------------------------------------------
 -- Approach 1. A suppressed view on top of the metric view
 -- -------------------------------------------------------------------------------------
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.pay_by_level_safe
+CREATE OR REPLACE VIEW tema_hr_semantic.pay_by_level_safe
 COMMENT 'Average compa-ratio by month, division and job level. Groups under 5 people are suppressed (NULL). Use this for dashboards.'
 AS
 SELECT month, division, job_level,
@@ -28,10 +31,10 @@ SELECT month, division, job_level,
        headcount < 5                                     AS is_suppressed
 FROM (SELECT month, division, job_level,
              MEASURE(avg_compa_ratio) AS avg_compa_ratio, MEASURE(headcount) AS headcount
-      FROM workspace.tema_hr_semantic.pay_metrics GROUP BY ALL);
+      FROM tema_hr_semantic.pay_metrics GROUP BY ALL);
 
 -- Check: expect 0 rows with a value for a group under 5
-SELECT * FROM workspace.tema_hr_semantic.pay_by_level_safe
+SELECT * FROM tema_hr_semantic.pay_by_level_safe
 WHERE month = '2026-10-31' AND is_suppressed AND avg_compa_ratio IS NOT NULL;
 
 -- Weakness: it's fixed at month x division x level. Grouping it by division alone re-aggregates
@@ -55,7 +58,7 @@ WHERE month = '2026-10-31' AND is_suppressed AND avg_compa_ratio IS NOT NULL;
         semiadditive: last
 */
 SELECT division, job_level, MEASURE(avg_compa_ratio_safe) AS avg_compa_ratio
-FROM workspace.tema_hr_semantic.pay_metrics
+FROM tema_hr_semantic.pay_metrics
 WHERE month = '2026-10-31'
 GROUP BY ALL ORDER BY division, job_level;     -- the 13 small groups come back NULL
 

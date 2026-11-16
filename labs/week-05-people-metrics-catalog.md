@@ -22,17 +22,23 @@ In the metric view docs, read about **level of detail (LOD)** expressions, **per
 Create `hr_people_analytics/metrics/talent_acquisition_metrics.sql`:
 
 ```sql
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.talent_acquisition_metrics
-WITH METRICS LANGUAGE YAML AS $$
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.talent_acquisition_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema hiring funnel, one row per requisition. Time to fill counts calendar days from opened to filled."
-source: workspace.tema_hr_gold.fact_requisitions
+comment: 'Tema hiring funnel, one row per requisition. Time to fill counts calendar days from opened to filled.'
+source: {catalog}.tema_hr_gold.fact_requisitions
 joins:
   - name: dept
-    source: workspace.tema_hr_gold.dim_department
+    source: {catalog}.tema_hr_gold.dim_department
     on: source.department_id = dept.department_id
   - name: job
-    source: workspace.tema_hr_gold.dim_job
+    source: {catalog}.tema_hr_gold.dim_job
     on: source.job_id = job.job_id
 dimensions:
   - name: opened_month
@@ -54,14 +60,15 @@ measures:
     expr: COUNT(1) FILTER (WHERE source.status = 'Open')
   - name: median_time_to_fill_days
     display_name: Median time to fill (days)
-    synonyms: ["time to hire", "days to fill"]
+    synonyms: ['time to hire', 'days to fill']
     expr: MEDIAN(source.days_to_fill)
   - name: offer_acceptance_rate
     display_name: Offer acceptance rate
     expr: SUM(source.offers_accepted) / SUM(source.offers_extended)
   - name: applicants_per_hire
     expr: SUM(source.applicants) FILTER (WHERE source.status = 'Filled') / COUNT(1) FILTER (WHERE source.status = 'Filled')
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;
 ```
 
 Then answer: "How do time to fill and offer acceptance for AI roles compare with the rest of Tema since the AI boom began?"
@@ -69,7 +76,7 @@ Then answer: "How do time to fill and offer acceptance for AI roles compare with
 ```sql
 SELECT division = 'AI' AS is_ai,
        MEASURE(median_time_to_fill_days), MEASURE(offer_acceptance_rate), MEASURE(requisitions)
-FROM workspace.tema_hr_semantic.talent_acquisition_metrics
+FROM tema_hr_semantic.talent_acquisition_metrics
 WHERE opened_date >= '2025-05-01' AND status = 'Filled'
 GROUP BY ALL;
 ```
@@ -91,14 +98,20 @@ Build `experience_metrics` on `fact_engagement` with dimensions `survey_cycle`, 
 <summary>Answer</summary>
 
 ```sql
-CREATE OR REPLACE VIEW workspace.tema_hr_semantic.experience_metrics
-WITH METRICS LANGUAGE YAML AS $$
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
+
+-- Metric view YAML needs full three-part names, so it says {catalog} and replace() fills in tema_catalog.
+-- The YAML sits in a "..." SQL string, so it uses single quotes only (write an apostrophe as '').
+DECLARE OR REPLACE VARIABLE metric_view_sql STRING;
+SET VAR metric_view_sql = 'CREATE OR REPLACE VIEW ' || tema_catalog || '.tema_hr_semantic.experience_metrics
+WITH METRICS LANGUAGE YAML AS $$' || replace("
 version: 1.1
-comment: "Tema engagement survey results, twice a year. One row per response."
-source: workspace.tema_hr_gold.fact_engagement
+comment: 'Tema engagement survey results, twice a year. One row per response.'
+source: {catalog}.tema_hr_gold.fact_engagement
 joins:
   - name: dept
-    source: workspace.tema_hr_gold.dim_department
+    source: {catalog}.tema_hr_gold.dim_department
     on: source.department_id = dept.department_id
 dimensions:
   - name: survey_cycle
@@ -112,13 +125,14 @@ measures:
     expr: COUNT(1)
   - name: enps
     display_name: eNPS
-    comment: "% promoters (9-10) minus % detractors (0-6). Ranges from -100 to +100."
+    comment: '% promoters (9-10) minus % detractors (0-6). Ranges from -100 to +100.'
     expr: 100.0 * (COUNT(1) FILTER (WHERE source.enps_score >= 9) - COUNT(1) FILTER (WHERE source.enps_score <= 6)) / COUNT(1)
   - name: engagement_score
     expr: AVG(source.engagement_score)
   - name: manager_score
     expr: AVG(source.manager_score)
-$$;
+", '{catalog}', tema_catalog) || '$$';
+EXECUTE IMMEDIATE metric_view_sql;
 ```
 
 eNPS by cycle should run from **−7.1** in 2023-H1 (after the layoffs) to **+16.7** in 2026-H1.

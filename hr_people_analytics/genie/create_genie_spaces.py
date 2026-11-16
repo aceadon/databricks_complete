@@ -1,7 +1,7 @@
 """Create the two Week 7 Genie Agents (spaces) through the Databricks API, then test them.
 
-  Tema raw (baseline)          every table in workspace.tema_hr_raw, no instructions
-  People Analytics Assistant   the metric views in workspace.tema_hr_semantic, the instructions from
+  Tema raw (baseline)          every table in <catalog>.tema_hr_raw, no instructions
+  People Analytics Assistant   the metric views in <catalog>.tema_hr_semantic, the instructions from
                                instructions.md and the example SQL from example_queries.sql
 
 Then it asks both "How many people did we have at the end of Q2 2025?" and prints what each answered, and
@@ -29,7 +29,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 RECORDER_CONFIG = REPO / "demo-video" / "recorder" / "config.json"
-CATALOG = "workspace"
+CATALOG = "workspace"   # default; pass --catalog to use another (README, "Choose your catalog")
 RAW_SCHEMA = "tema_hr_raw"
 SEMANTIC_SCHEMA = "tema_hr_semantic"
 # The assistant's sources (instructions.md). pay_metrics is left out on purpose: it has unsuppressed pay.
@@ -100,6 +100,7 @@ def parse_examples(path, existing):
     examples = []
     for m in re.finditer(r"^-- (?!=)(.+\?)\s*\n((?:(?!--).*\n?)+?;)", text, re.M):
         question, sql = m.group(1).strip(), m.group(2).strip()
+        sql = re.sub(r"\bworkspace\.", CATALOG + ".", sql)   # example SQL names the default catalog
         used = set(re.findall(rf"{SEMANTIC_SCHEMA}\.(\w+)", sql))
         if used <= existing:
             examples.append((question, sql))
@@ -184,12 +185,15 @@ def space_url(host, space_id, org):
 
 
 def main():
+    global CATALOG
     p = argparse.ArgumentParser()
     p.add_argument("--host")
+    p.add_argument("--catalog", default="workspace", help="catalog that holds the Tema schemas (default: workspace)")
     p.add_argument("--warehouse-id")
     p.add_argument("--recreate", action="store_true")
     p.add_argument("--test-only", action="store_true")
     args = p.parse_args()
+    CATALOG = args.catalog
 
     cfg = json.loads(RECORDER_CONFIG.read_text(encoding="utf-8")) if RECORDER_CONFIG.exists() else {}
     host = args.host or os.environ.get("DATABRICKS_HOST") or cfg.get("workspaceUrl", "")

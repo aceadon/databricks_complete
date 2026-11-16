@@ -4,7 +4,8 @@
 -- Run after 01_dimensions.sql and 02_facts.sql. Safe to rerun: existing constraints are dropped first.
 -- Same content as solutions/week-02-keys-and-comments.sql.
 -- =====================================================================================
-USE CATALOG workspace;
+DECLARE OR REPLACE VARIABLE tema_catalog STRING DEFAULT 'workspace';  -- your catalog: see README, "Choose your catalog"
+USE CATALOG IDENTIFIER(tema_catalog);
 USE SCHEMA tema_hr_gold;
 
 -- Make the file rerunnable: drop foreign keys first (they depend on the primary keys), then primary keys.
@@ -83,7 +84,7 @@ SELECT f.job_id FROM fact_headcount_monthly f LEFT ANTI JOIN dim_job j ON j.job_
 
 -- See what you declared
 SELECT table_name, constraint_name, constraint_type
-FROM workspace.information_schema.table_constraints
+FROM information_schema.table_constraints
 WHERE table_schema = 'tema_hr_gold'
 ORDER BY table_name, constraint_type DESC;
 
@@ -270,5 +271,21 @@ ALTER TABLE fact_equity_grants ALTER COLUMN shares          COMMENT 'Number of s
 ALTER TABLE fact_equity_grants ALTER COLUMN vesting_years   COMMENT 'Years over which the grant vests. Always 4 at Tema.';
 
 -- Checkpoint: columns with no comment (expect 0 rows)
-SELECT table_name, column_name FROM workspace.information_schema.columns
+SELECT table_name, column_name FROM information_schema.columns
 WHERE table_schema = 'tema_hr_gold' AND (comment IS NULL OR comment = '');
+
+-- Mark every gold table as synthetic, so nobody in a shared catalog mistakes it for real people data.
+-- Shows under Details > Properties in Catalog Explorer. The schema comment says the same.
+ALTER TABLE dim_department         SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE dim_location           SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE dim_job                SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE dim_employee           SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE dim_employee_sensitive SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE dim_manager            SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE dim_date               SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE fact_headcount_monthly SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE fact_terminations      SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE fact_requisitions      SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE fact_engagement        SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE fact_absences          SET TBLPROPERTIES ('synthetic_data' = 'true');
+ALTER TABLE fact_equity_grants     SET TBLPROPERTIES ('synthetic_data' = 'true');

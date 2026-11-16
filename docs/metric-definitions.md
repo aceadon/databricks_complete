@@ -6,9 +6,9 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 
 # Workforce metrics
 
-**Metric view:** `workspace.tema_hr_semantic.workforce_metrics`
+**Metric view:** `tema_hr_semantic.workforce_metrics`
 **Source file:** [`hr_people_analytics/metrics/workforce_metrics.sql`](../hr_people_analytics/metrics/workforce_metrics.sql)
-**Grain:** `workspace.tema_hr_gold.fact_headcount_monthly`, one row per employee per month they were employed
+**Grain:** `tema_hr_gold.fact_headcount_monthly`, one row per employee per month they were employed
 **Joins:** `dim_date` (as `dt`, on `snapshot_month = month_end`), `dim_department` (as `dept`), `dim_job` (as `job`), `dim_location` (as `loc`)
 
 ### Dimensions
@@ -44,7 +44,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Includes** | Full-time and part-time employees |
 | **Excludes** | People not active at month end, such as anyone who left during the month |
 | **Synonyms** | employees, number of people, staff |
-| **Metric view** | `workspace.tema_hr_semantic.workforce_metrics.headcount` |
+| **Metric view** | `tema_hr_semantic.workforce_metrics.headcount` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | A part-timer counts as 1. Use FTE when comparing cost or capacity |
 
@@ -58,7 +58,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Time behaviour** | Semi-additive, like Headcount |
 | **Includes** | Full-time employees (FTE 1.0) and part-time employees at their FTE (0.5, 0.6 or 0.8 in the Tema data) |
 | **Excludes** | People not active at month end |
-| **Metric view** | `workspace.tema_hr_semantic.workforce_metrics.fte` |
+| **Metric view** | `tema_hr_semantic.workforce_metrics.fte` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | Part-time FTE comes from the HR record; a change in hours shows up from the next month end |
 
@@ -72,7 +72,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Time behaviour** | Additive: a quarter is the sum of its months |
 | **Includes** | Full-time and part-time hires |
 | **Excludes** | Internal transfers and promotions (not hires). Rehires are not modelled in Tema |
-| **Metric view** | `workspace.tema_hr_semantic.workforce_metrics.hires` |
+| **Metric view** | `tema_hr_semantic.workforce_metrics.hires` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | Counts employee-month rows flagged as a hire month, not distinct people |
 
@@ -86,7 +86,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Time behaviour** | Additive |
 | **Includes** | Voluntary and involuntary leavers |
 | **Excludes** | Internal transfers. Unlike the attrition rates, this simple count still includes part-time leavers after the Week 10 change |
-| **Metric view** | `workspace.tema_hr_semantic.workforce_metrics.leavers` |
+| **Metric view** | `tema_hr_semantic.workforce_metrics.leavers` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | The fact table also has voluntary and regretted flags. Their trailing 12-month rates live in `retention_metrics` |
 
@@ -100,7 +100,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Time behaviour** | Additive, because both inputs are additive |
 | **Includes** | Same as Hires and Leavers |
 | **Excludes** | Internal transfers |
-| **Metric view** | `workspace.tema_hr_semantic.workforce_metrics.net_change` |
+| **Metric view** | `tema_hr_semantic.workforce_metrics.net_change` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | People who move between departments are not hires or leavers, so Net change for one department will not always match the change in its Headcount |
 
@@ -114,7 +114,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Time behaviour** | Semi-additive: the last month's average |
 | **Includes** | Full-time and part-time employees |
 | **Excludes** | People not active at month end. Bonus and equity are not included |
-| **Metric view** | `workspace.tema_hr_semantic.workforce_metrics.average_salary` |
+| **Metric view** | `tema_hr_semantic.workforce_metrics.average_salary` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | Salary is sensitive. Small groups (for example one city and job level) can reveal an individual's pay, so this needs suppression or access rules before sharing widely |
 
@@ -128,7 +128,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Time behaviour** | Semi-additive: the last month's ratio |
 | **Includes** | Everyone active at month end, split by `job.is_manager` |
 | **Excludes** | People not active at month end |
-| **Metric view** | `workspace.tema_hr_semantic.workforce_metrics.span_of_control` |
+| **Metric view** | `tema_hr_semantic.workforce_metrics.span_of_control` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | This is a ratio for the slice, not the average of each manager's direct reports. A slice with no managers (for example a single job level of ICs) divides by zero |
 
@@ -136,9 +136,9 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 
 # Retention metrics
 
-**Metric view:** `workspace.tema_hr_semantic.retention_metrics`
+**Metric view:** `tema_hr_semantic.retention_metrics`
 **Source file:** [`hr_people_analytics/metrics/retention_metrics.sql`](../hr_people_analytics/metrics/retention_metrics.sql) (Week 4, changed in Week 10)
-**Grain:** `workspace.tema_hr_gold.fact_headcount_monthly`, one row per employee per month they were employed
+**Grain:** `tema_hr_gold.fact_headcount_monthly`, one row per employee per month they were employed
 **Joins:** same as Workforce metrics (`dt`, `dept`, `job`, `loc`)
 
 ### Rules shared by every attrition rate
@@ -163,7 +163,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Includes** | Voluntary and involuntary leavers (including layoffs), Full-time employees only |
 | **Excludes** | Part-time employees (Week 10). Internal transfers. Interns and contractors (none in the Tema data) |
 | **Synonyms** | attrition, turnover, attrition rate, churn |
-| **Metric view** | `workspace.tema_hr_semantic.retention_metrics.attrition_rate_t12m` |
+| **Metric view** | `tema_hr_semantic.retention_metrics.attrition_rate_t12m` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | Check values at 5,000 people: 11.8% for October 2025, 12.9% for October 2026 (581 leavers ÷ 4,488 average headcount); before the Week 10 change 12.0% and 13.1%. A layoff month (January 2023) lifts this rate for the next 12 months, so use the voluntary rate to judge whether people are choosing to leave |
 
@@ -178,7 +178,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Includes** | People who resigned, for any reason (career growth, compensation, manager, relocation, work-life balance, competitor offer, other) |
 | **Excludes** | Part-time employees (Week 10). Involuntary leavers (performance, restructuring, policy violation, layoffs). Internal transfers. Interns and contractors (none in the Tema data) |
 | **Synonyms** | voluntary turnover, resignation rate, voluntary attrition |
-| **Metric view** | `workspace.tema_hr_semantic.retention_metrics.voluntary_attrition_rate_t12m` |
+| **Metric view** | `tema_hr_semantic.retention_metrics.voluntary_attrition_rate_t12m` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | Denominator is the **whole** workforce, not only people who could resign. Check values at 5,000 people: 9.3% for October 2025, 9.9% for October 2026 (9.4% and 10.0% before Week 10). Voluntary + involuntary = all attrition |
 
@@ -193,7 +193,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Includes** | Leavers flagged `is_regretted`. In practice these are all voluntary leavers, because involuntary leavers are always `false` |
 | **Excludes** | Part-time employees (Week 10). Involuntary leavers. Voluntary leavers not flagged as regretted. Current employees (`is_regretted` is only set for leavers, and the fact flag treats empty as false). Internal transfers. Interns and contractors (none in the Tema data) |
 | **Synonyms** | regretted turnover, regretted losses, regrettable attrition |
-| **Metric view** | `workspace.tema_hr_semantic.retention_metrics.regretted_attrition_rate_t12m` |
+| **Metric view** | `tema_hr_semantic.retention_metrics.regretted_attrition_rate_t12m` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | A subset of voluntary attrition, so it is always lower. Denominator is the whole workforce, not "people we'd regret losing". Check values at 5,000 people: 3.6% for October 2025, 4.2% for October 2026 (4.3% before Week 10); AI is highest at about 10%. Who sets the flag, and when, needs an owner: a flag recorded by the manager after the person leaves can be biased |
 
@@ -208,7 +208,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 | **Includes** | Voluntary and involuntary leavers with under 12 months' tenure. The denominator is only people with under 12 months' tenure, not the whole workforce |
 | **Excludes** | Part-time employees (Week 10). Leavers with 12 months' tenure or more. Internal transfers (tenure counts from hire date, so a transfer does not restart someone's first year). Interns and contractors (none in the Tema data) |
 | **Synonyms** | new hire attrition, early attrition, first-year turnover |
-| **Metric view** | `workspace.tema_hr_semantic.retention_metrics.first_year_attrition_rate_t12m` |
+| **Metric view** | `tema_hr_semantic.retention_metrics.first_year_attrition_rate_t12m` |
 | **Status** | Certified (Week 9) |
 | **Caveats** | Tenure is measured at the **month end** of each row, so someone who leaves on day 360 but whose month end falls after their first anniversary counts as a second-year leaver. Check values at 5,000 people: 20.9% for October 2025, 24.0% for October 2026 (21.3% and 24.0% before Week 10), close to double the overall rate. For a voluntary-only version, add a separate measure (`first_year_voluntary_attrition_rate_t12m`) rather than filtering this one |
 
@@ -217,9 +217,9 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 
 # Talent acquisition metrics
 
-**Metric view:** `workspace.tema_hr_semantic.talent_acquisition_metrics`
+**Metric view:** `tema_hr_semantic.talent_acquisition_metrics`
 **Source file:** [`hr_people_analytics/metrics/talent_acquisition_metrics.sql`](../hr_people_analytics/metrics/talent_acquisition_metrics.sql) (Week 5)
-**Grain:** `workspace.tema_hr_gold.fact_requisitions`, one row per opened role
+**Grain:** `tema_hr_gold.fact_requisitions`, one row per opened role
 **Dimensions:** `opened_month`, `opened_date`, `status`, `division`, `is_ai_division`, `department`, `job_level`
 
 ## Median time to fill
@@ -284,7 +284,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 
 # Pay metrics
 
-**Metric view:** `workspace.tema_hr_semantic.pay_metrics` (restricted: not granted to the broad audience)
+**Metric view:** `tema_hr_semantic.pay_metrics` (restricted: not granted to the broad audience)
 **Source file:** [`hr_people_analytics/metrics/pay_metrics.sql`](../hr_people_analytics/metrics/pay_metrics.sql) (Weeks 5 and 9)
 **Grain:** `fact_headcount_monthly`, same joins as Workforce metrics
 **Safe version for dashboards:** `tema_hr_semantic.pay_by_level_safe` (Week 9)
@@ -326,7 +326,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 
 # Experience metrics
 
-**Metric view:** `workspace.tema_hr_semantic.experience_metrics`
+**Metric view:** `tema_hr_semantic.experience_metrics`
 **Source file:** [`hr_people_analytics/metrics/experience_metrics.sql`](../hr_people_analytics/metrics/experience_metrics.sql) (Week 5)
 **Grain:** `fact_engagement`, one row per survey response (May and November each year)
 
@@ -362,7 +362,7 @@ One entry per metric. The metric view YAML in `hr_people_analytics/metrics/` mus
 
 # Business metrics (Week 11)
 
-**Metric view:** `workspace.tema_hr_semantic.business_metrics`
+**Metric view:** `tema_hr_semantic.business_metrics`
 **Source file:** [`hr_people_analytics/metrics/business_metrics.sql`](../hr_people_analytics/metrics/business_metrics.sql)
 **Grain:** `fact_business_monthly`, one row per month. **Synthetic** numbers sized for 70,000 people
 
